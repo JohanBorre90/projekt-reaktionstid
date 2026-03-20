@@ -1,0 +1,1134 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Reaktionstest</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/katex.min.js"></script>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #f0f4f8;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      padding: 24px 16px;
+      color: #1a202c;
+    }
+
+    h1 {
+      font-size: 1.8rem;
+      margin-bottom: 6px;
+      text-align: center;
+    }
+
+    .subtitle {
+      color: #718096;
+      font-size: 0.95rem;
+      text-align: center;
+      margin-bottom: 32px;
+    }
+
+    .card {
+      background: white;
+      border-radius: 16px;
+      padding: 28px 24px;
+      width: 100%;
+      max-width: 480px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    }
+
+    .step-label {
+      font-size: 0.78rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #4a90d9;
+      margin-bottom: 8px;
+    }
+
+    .card h2 {
+      font-size: 1.25rem;
+      margin-bottom: 20px;
+    }
+
+    label {
+      display: block;
+      font-size: 0.9rem;
+      font-weight: 600;
+      margin-bottom: 6px;
+      color: #2d3748;
+    }
+
+    select, input[type="text"], input[type="number"] {
+      width: 100%;
+      padding: 10px 14px;
+      border: 2px solid #e2e8f0;
+      border-radius: 10px;
+      font-size: 1rem;
+      margin-bottom: 18px;
+      outline: none;
+      transition: border-color 0.2s;
+      background: #f7fafc;
+      color: #1a202c;
+    }
+
+    select:focus, input:focus {
+      border-color: #4a90d9;
+      background: white;
+    }
+
+    .radio-group {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .radio-option {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 10px;
+      border: 2px solid #e2e8f0;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 0.95rem;
+      transition: all 0.2s;
+    }
+
+    .radio-option input[type="radio"] {
+      display: none;
+    }
+
+    .radio-option.selected {
+      border-color: #4a90d9;
+      background: #ebf4ff;
+      color: #2b6cb0;
+      font-weight: 600;
+    }
+
+    .btn {
+      width: 100%;
+      padding: 14px;
+      border: none;
+      border-radius: 12px;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+      margin-top: 4px;
+    }
+
+    .btn-primary {
+      background: #4a90d9;
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: #357abd;
+      transform: translateY(-1px);
+    }
+
+    .btn-primary:active {
+      transform: translateY(0);
+    }
+
+    /* Reaktionstest */
+    #reaction-box {
+      width: 100%;
+      height: 220px;
+      border-radius: 14px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      user-select: none;
+      transition: background 0.1s;
+      margin-bottom: 20px;
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: white;
+      text-align: center;
+      padding: 16px;
+    }
+
+    #reaction-box.waiting {
+      background: #e53e3e;
+    }
+
+    #reaction-box.ready {
+      background: #38a169;
+    }
+
+    #reaction-box.too-early {
+      background: #dd6b20;
+    }
+
+    #reaction-box.idle {
+      background: #718096;
+      cursor: default;
+    }
+
+    #reaction-box.countdown {
+      background: #6b46c1;
+      cursor: default;
+      gap: 8px;
+    }
+
+    .round-results {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 16px;
+      justify-content: center;
+    }
+
+    .round-chip {
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      background: #edf2f7;
+      color: #4a5568;
+    }
+
+    .round-chip.done {
+      background: #c6f6d5;
+      color: #276749;
+    }
+
+    .round-chip.failed {
+      background: #fed7d7;
+      color: #9b2c2c;
+    }
+
+    .round-chip.best {
+      background: #fefcbf;
+      color: #744210;
+      border: 2px solid #f6e05e;
+    }
+
+    /* Resultat */
+    .result-big {
+      font-size: 3rem;
+      font-weight: 800;
+      color: #4a90d9;
+      text-align: center;
+      margin: 16px 0 4px;
+    }
+
+    .result-unit {
+      text-align: center;
+      color: #718096;
+      font-size: 0.9rem;
+      margin-bottom: 20px;
+    }
+
+    .result-section-label {
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+      color: #a0aec0;
+      margin: 16px 0 6px;
+    }
+
+    .result-details {
+      background: #f7fafc;
+      border-radius: 10px;
+      padding: 14px;
+      margin-bottom: 8px;
+    }
+
+    .result-details p {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.9rem;
+      padding: 5px 0;
+      color: #4a5568;
+      border-bottom: 1px solid #edf2f7;
+    }
+
+    .result-details p:last-child {
+      border-bottom: none;
+    }
+
+    .result-details p span:last-child {
+      font-weight: 600;
+      color: #2d3748;
+    }
+
+    .result-details p.best-row {
+      background: #fffff0;
+      border-radius: 6px;
+      padding: 5px 8px;
+      margin: 0 -8px;
+    }
+
+    .result-details p.best-row span:last-child {
+      color: #744210;
+    }
+
+    .best-badge {
+      font-size: 0.72rem;
+      background: #f6e05e;
+      color: #744210;
+      border-radius: 10px;
+      padding: 1px 7px;
+      margin-left: 6px;
+      font-weight: 700;
+    }
+
+    .saved-msg {
+      text-align: center;
+      font-size: 0.9rem;
+      color: #38a169;
+      font-weight: 600;
+      margin-bottom: 16px;
+      display: none;
+    }
+
+    .error-msg {
+      text-align: center;
+      font-size: 0.9rem;
+      color: #e53e3e;
+      font-weight: 600;
+      margin-bottom: 16px;
+      display: none;
+    }
+
+    .btn-secondary {
+      background: #edf2f7;
+      color: #4a5568;
+    }
+
+    .btn-secondary:hover {
+      background: #e2e8f0;
+      transform: translateY(-1px);
+    }
+
+    .btn-group {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .outlier-box {
+      border-radius: 10px;
+      padding: 14px 16px;
+      margin-bottom: 16px;
+      font-size: 0.88rem;
+      line-height: 1.5;
+    }
+
+    .outlier-box.warn {
+      background: #fffbeb;
+      border: 1.5px solid #f6e05e;
+      color: #744210;
+    }
+
+    .outlier-box.ok {
+      background: #f0fff4;
+      border: 1.5px solid #9ae6b4;
+      color: #276749;
+    }
+
+    .outlier-box strong {
+      display: block;
+      margin-bottom: 4px;
+      font-size: 0.93rem;
+    }
+
+    .result-details p.outlier-row span:last-child {
+      color: #c05621;
+    }
+
+    .result-details p.outlier-row {
+      background: #fff5f0;
+      border-radius: 6px;
+      padding: 5px 8px;
+      margin: 0 -8px;
+    }
+
+    /* Inline formel-toggle */
+    .formel-toggle-hint {
+      font-size: 0.72rem;
+      color: #4a90d9;
+      margin-left: 5px;
+      cursor: pointer;
+    }
+
+    .formel-inline {
+      background: #ebf4ff;
+      border-radius: 6px;
+      padding: 10px 14px;
+      margin: -2px 0 4px;
+      color: #2b6cb0;
+      border-bottom: 1px solid #edf2f7;
+      overflow-x: auto;
+    }
+
+    .formel-inline small {
+      display: block;
+      margin-top: 6px;
+      opacity: 0.72;
+      font-size: 0.74rem;
+    }
+
+    /* Inline fejlbesked */
+    .field-error {
+      font-size: 0.82rem;
+      color: #e53e3e;
+      font-weight: 600;
+      margin-top: -10px;
+      margin-bottom: 14px;
+    }
+
+    /* Outlier definition (klikbar) */
+    .def-toggle {
+      font-size: 0.82rem;
+      color: inherit;
+      opacity: 0.85;
+      text-decoration: underline;
+      text-decoration-style: dotted;
+      cursor: pointer;
+      background: none;
+      border: none;
+      padding: 0;
+      margin-top: 10px;
+      display: inline-block;
+    }
+
+    .def-panel {
+      display: none;
+      margin-top: 8px;
+      font-size: 0.83rem;
+      padding: 10px 12px;
+      background: rgba(0,0,0,0.06);
+      border-radius: 8px;
+      line-height: 1.65;
+    }
+
+    .def-panel.open {
+      display: block;
+    }
+
+    .math-display {
+      margin: 10px 0 6px;
+      overflow-x: auto;
+    }
+
+    .iqr-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 6px;
+      margin: 8px 0 4px;
+    }
+
+    .iqr-cell {
+      background: rgba(0,0,0,0.07);
+      border-radius: 6px;
+      padding: 6px 8px;
+      font-size: 0.82rem;
+      text-align: center;
+      line-height: 1.4;
+    }
+
+    .iqr-cell .iqr-label {
+      display: block;
+      font-size: 0.7rem;
+      opacity: 0.7;
+      margin-bottom: 2px;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    .progress-bar {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 24px;
+      justify-content: center;
+    }
+
+    .progress-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #e2e8f0;
+    }
+
+    .progress-dot.active {
+      background: #4a90d9;
+    }
+
+    .progress-dot.done {
+      background: #38a169;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Reaktionstest</h1>
+  <p class="subtitle">Matematik · Deskriptiv statistik</p>
+  <a href="data.html" style="font-size:0.85rem; color:#4a90d9; text-decoration:none; margin-bottom:8px; display:inline-block;">Se datasæt →</a>
+
+  <!-- Fremgangsindikator -->
+  <div class="progress-bar" id="progress-bar">
+    <div class="progress-dot active" id="dot-1"></div>
+    <div class="progress-dot" id="dot-2"></div>
+    <div class="progress-dot" id="dot-3"></div>
+    <div class="progress-dot" id="dot-4"></div>
+  </div>
+
+  <!-- TRIN 1: Eleven vælger sit navn -->
+  <div class="card" id="step-1">
+    <div class="step-label">Trin 1 af 4</div>
+    <h2>Hvem er du?</h2>
+    <label for="student-select">Vælg dit navn (elev)</label>
+    <select id="student-select">
+      <option value="">— Vælg dit navn —</option>
+      <!-- Tilføj elevnavne her -->
+      <option>Ahmed</option>
+      <option>Alberte</option>
+      <option>Camilla</option>
+      <option>Christian</option>
+      <option>Emma</option>
+      <option>Frederik</option>
+      <option>Gustav</option>
+      <option>Ida</option>
+      <option>Jonas</option>
+      <option>Julie</option>
+      <option>Katrine</option>
+      <option>Lars</option>
+      <option>Laura</option>
+      <option>Luca</option>
+      <option>Maja</option>
+      <option>Marcus</option>
+      <option>Marie</option>
+      <option>Mathias</option>
+      <option>Mikkel</option>
+      <option>Nicolai</option>
+      <option>Oliver</option>
+      <option>Oskar</option>
+      <option>Rasmus</option>
+      <option>Sara</option>
+      <option>Sebastian</option>
+      <option>Simone</option>
+      <option>Sofia</option>
+      <option>Thomas</option>
+      <option>Victor</option>
+      <option>Villads</option>
+    </select>
+    <button class="btn btn-primary" onclick="goToStep2()">Fortsæt</button>
+  </div>
+
+  <!-- TRIN 2: Testpersonens oplysninger -->
+  <div class="card hidden" id="step-2">
+    <div class="step-label">Trin 2 af 4</div>
+    <h2>Testpersonens oplysninger</h2>
+
+    <label for="person-name">Testpersonens navn</label>
+    <input type="text" id="person-name" placeholder="Fornavn Efternavn" />
+    <p style="font-size:0.8rem;color:#718096;margin-top:-12px;margin-bottom:10px;">
+      Skriv fulde navn (fornavn + efternavn) så vi undgår dobbeltregistreringer.
+    </p>
+    <p id="name-error" class="field-error hidden"></p>
+
+    <div id="duplicate-warning" class="hidden" style="
+      background:#fffbeb; border:1.5px solid #f6e05e; border-radius:10px;
+      padding:12px 14px; margin-bottom:16px; font-size:0.88rem;
+      color:#744210; line-height:1.5;">
+    </div>
+
+    <label for="person-age">Alder</label>
+    <input type="number" id="person-age" placeholder="f.eks. 42" min="5" max="110" />
+
+    <label>Køn</label>
+    <div class="radio-group">
+      <label class="radio-option" id="label-mand" onclick="selectGender('Mand')">
+        <input type="radio" name="gender" value="Mand" /> Mand
+      </label>
+      <label class="radio-option" id="label-kvinde" onclick="selectGender('Kvinde')">
+        <input type="radio" name="gender" value="Kvinde" /> Kvinde
+      </label>
+      <label class="radio-option" id="label-andet" onclick="selectGender('Andet')">
+        <input type="radio" name="gender" value="Andet" /> Andet
+      </label>
+    </div>
+
+    <button class="btn btn-primary" id="start-btn" onclick="goToStep3()">Start testen</button>
+    <button class="btn btn-secondary btn hidden" id="force-btn" onclick="proceedToStep3()">Registrer alligevel</button>
+  </div>
+
+  <!-- TRIN 3: Reaktionstest -->
+  <div class="card hidden" id="step-3">
+    <div class="step-label">Trin 3 af 4</div>
+    <h2>Reaktionstest</h2>
+    <p style="color:#718096; font-size:0.9rem; margin-bottom:16px;">
+      Klik på den røde boks, når den skifter til <strong>grøn</strong>. Du laver 5 forsøg — de kører automatisk efter hinanden.
+    </p>
+
+    <div class="round-results" id="round-results">
+      <div class="round-chip" id="chip-1">Runde 1</div>
+      <div class="round-chip" id="chip-2">Runde 2</div>
+      <div class="round-chip" id="chip-3">Runde 3</div>
+      <div class="round-chip" id="chip-4">Runde 4</div>
+      <div class="round-chip" id="chip-5">Runde 5</div>
+    </div>
+
+    <div id="reaction-box" class="idle" onclick="handleClick()">
+      Tryk her for at starte
+    </div>
+
+    <p id="round-info" style="text-align:center; color:#718096; font-size:0.9rem; min-height:1.4rem;"></p>
+  </div>
+
+  <!-- TRIN 4: Gennemse & verificer -->
+  <div class="card hidden" id="step-4">
+    <div class="step-label">Trin 4 af 4</div>
+    <h2>Gennemse resultater</h2>
+
+    <div class="result-big" id="result-avg">—</div>
+    <div class="result-unit">millisekunder (gennemsnit af 5 forsøg)</div>
+
+    <div id="result-details"></div>
+
+    <!-- Outlier-analyse -->
+    <div id="outlier-box" class="outlier-box hidden"></div>
+
+    <!-- Før gem: to knapper -->
+    <div id="pre-save-buttons" class="btn-group">
+      <button class="btn btn-primary" onclick="confirmSave()">Gem i database</button>
+      <button class="btn btn-secondary btn" onclick="retakeTest()">Lav testen om</button>
+    </div>
+
+    <!-- Efter gem: bekræftelse -->
+    <div id="post-save" class="hidden btn-group">
+      <div class="saved-msg" id="saved-msg" style="display:block;">Data gemt i databasen!</div>
+      <button class="btn btn-primary" onclick="resetAll()">Test en ny person</button>
+    </div>
+
+    <div class="error-msg" id="error-msg">Kunne ikke gemme data. Tjek din internetforbindelse.</div>
+  </div>
+
+  <!-- Firebase SDK -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getFirestore, collection, addDoc, getDocs, query, where, serverTimestamp }
+      from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+    // ============================================================
+    //  UDFYLD DIN FIREBASE-KONFIGURATION HER
+    //  (Find den i Firebase Console → Projektindstillinger → Din app)
+    // ============================================================
+    const firebaseConfig = {
+      apiKey:            "AIzaSyBpPh11XsjZa5ErEJgkQIK43lTwjacx9tY",
+      authDomain:        "reaktionstest-3dd96.firebaseapp.com",
+      projectId:         "reaktionstest-3dd96",
+      storageBucket:     "reaktionstest-3dd96.firebasestorage.app",
+      messagingSenderId: "176269433635",
+      appId:             "1:176269433635:web:5db872724aeebd9fcc0a96"
+    };
+    // ============================================================
+
+    const app = initializeApp(firebaseConfig);
+    const db  = getFirestore(app);
+
+    // Gør Firestore tilgængeligt globalt
+    window._db              = db;
+    window._collection      = collection;
+    window._addDoc          = addDoc;
+    window._getDocs         = getDocs;
+    window._query           = query;
+    window._where           = where;
+    window._serverTimestamp = serverTimestamp;
+  </script>
+
+  <script>
+    // ── Tilstand ──────────────────────────────────────────────
+    let studentName = "";
+    let personName  = "";
+    let personAge   = null;
+    let personGender = "";
+
+    let rounds      = [];       // gemte tider i ms
+    let currentRound = 0;       // 0-baseret
+    let state       = "idle";   // idle | waiting | ready | countdown
+    let startTime   = null;
+    let waitTimer   = null;
+
+    const TOTAL_ROUNDS = 5;
+
+    // ── Navigation ────────────────────────────────────────────
+    function show(id) {
+      document.querySelectorAll('.card').forEach(c => c.classList.add('hidden'));
+      document.getElementById(id).classList.remove('hidden');
+    }
+
+    function updateProgress(step) {
+      for (let i = 1; i <= 4; i++) {
+        const dot = document.getElementById('dot-' + i);
+        dot.className = 'progress-dot';
+        if (i < step)  dot.classList.add('done');
+        if (i === step) dot.classList.add('active');
+      }
+    }
+
+    // ── Trin 1 → 2 ───────────────────────────────────────────
+    function goToStep2() {
+      const sel = document.getElementById('student-select').value;
+      if (!sel) { alert('Vælg venligst dit navn.'); return; }
+      studentName = sel;
+      updateProgress(2);
+      show('step-2');
+    }
+
+    // ── Kønvalg ───────────────────────────────────────────────
+    function selectGender(val) {
+      personGender = val;
+      ['Mand','Kvinde','Andet'].forEach(g => {
+        document.getElementById('label-' + g.toLowerCase()).classList
+          .toggle('selected', g === val);
+      });
+    }
+
+    // ── Trin 2 → 3 ───────────────────────────────────────────
+    async function goToStep3() {
+      const name = document.getElementById('person-name').value.trim();
+      const age  = parseInt(document.getElementById('person-age').value);
+
+      const nameErr = document.getElementById('name-error');
+      nameErr.classList.add('hidden');
+
+      if (!name) {
+        nameErr.textContent = 'Indtast testpersonens navn.';
+        nameErr.classList.remove('hidden');
+        return;
+      }
+      if (name.split(' ').filter(Boolean).length < 2) {
+        nameErr.textContent = 'Skriv fulde navn — både fornavn og efternavn.';
+        nameErr.classList.remove('hidden');
+        document.getElementById('person-name').focus();
+        return;
+      }
+      if (!age || age < 5) { alert('Indtast en gyldig alder (min. 5).'); return; }
+      if (!personGender)   { alert('Vælg et køn.');                       return; }
+
+      // Skjul evt. tidligere advarsel
+      const warn = document.getElementById('duplicate-warning');
+      warn.classList.add('hidden');
+      document.getElementById('force-btn').classList.add('hidden');
+
+      // Tjek for duplikat i databasen
+      const startBtn = document.getElementById('start-btn');
+      startBtn.disabled = true;
+      startBtn.textContent = 'Tjekker…';
+
+      // Spring tjek over hvis Firebase endnu ikke er konfigureret
+      const projectId = window._db && window._db.app.options.projectId;
+      if (!projectId || projectId === 'INDSÆT-PROJECT-ID') {
+        proceedToStep3(name, age);
+        return;
+      }
+
+      try {
+        const normalized = name.toLowerCase().replace(/\s+/g, ' ');
+        const q = window._query(
+          window._collection(window._db, 'reaktioner'),
+          window._where('testperson_normalized', '==', normalized)
+        );
+        // Giv op efter 2,5 sekunder så siden ikke fryser
+        const timeout = new Promise((_, reject) =>
+          setTimeout(() => reject(new Error('timeout')), 2500)
+        );
+        const snap = await Promise.race([window._getDocs(q), timeout]);
+
+        startBtn.disabled = false;
+        startBtn.textContent = 'Start testen';
+
+        if (!snap.empty) {
+          const eksisterendeElev = snap.docs[0].data().elev || 'en anden elev';
+          warn.innerHTML =
+            `<strong>Denne person er allerede registreret.</strong><br>` +
+            `<em>${name}</em> er tidligere blevet testet af <strong>${eksisterendeElev}</strong>.<br>` +
+            `Er du sikker på at du vil registrere personen igen?`;
+          warn.classList.remove('hidden');
+          document.getElementById('force-btn').classList.remove('hidden');
+          // Gem til brug ved "Fortsæt alligevel"
+          personName = name;
+          personAge  = age;
+          return;
+        }
+      } catch (err) {
+        // Hvis tjekket fejler (fx ingen internet endnu), fortsæt blot
+        console.warn('Duplikat-tjek fejlede:', err);
+        startBtn.disabled = false;
+        startBtn.textContent = 'Start testen';
+      }
+
+      proceedToStep3(name, age);
+    }
+
+    function proceedToStep3(name, age) {
+      // Bruges både direkte og via "Fortsæt alligevel"
+      personName = name || personName;
+      personAge  = age  || personAge;
+      document.getElementById('duplicate-warning').classList.add('hidden');
+      document.getElementById('force-btn').classList.add('hidden');
+      resetGame();
+      updateProgress(3);
+      show('step-3');
+    }
+
+    // ── Spilmekanik ───────────────────────────────────────────
+    function resetGame() {
+      rounds       = [];
+      currentRound = 0;
+      state        = "idle";
+      startTime    = null;
+      if (waitTimer) clearTimeout(waitTimer);
+
+      const box = document.getElementById('reaction-box');
+      box.className     = 'idle';
+      box.textContent   = 'Tryk her for at starte';
+      document.getElementById('round-info').textContent = '';
+
+      for (let i = 1; i <= TOTAL_ROUNDS; i++) {
+        const chip = document.getElementById('chip-' + i);
+        chip.className   = 'round-chip';
+        chip.textContent = 'Runde ' + i;
+        chip.innerHTML   = 'Runde ' + i; // fjern evt. best-badge
+      }
+    }
+
+    function handleClick() {
+      if (state === 'idle') {
+        startRound();
+      } else if (state === 'waiting') {
+        tooEarly();
+      } else if (state === 'ready') {
+        registerTime();
+      }
+      // countdown: ignorer klik
+    }
+
+    function startRound() {
+      if (currentRound >= TOTAL_ROUNDS) return;
+      state = 'waiting';
+
+      const box = document.getElementById('reaction-box');
+      box.className   = 'waiting';
+      box.textContent = 'Vent…';
+      document.getElementById('round-info').textContent =
+        'Runde ' + (currentRound + 1) + ' af ' + TOTAL_ROUNDS;
+
+      const delay = 2000 + Math.random() * 3000; // 2–5 sekunder
+      waitTimer = setTimeout(() => {
+        state     = 'ready';
+        startTime = performance.now();
+        box.className   = 'ready';
+        box.textContent = 'KLIK NU!';
+      }, delay);
+    }
+
+    function tooEarly() {
+      if (waitTimer) clearTimeout(waitTimer);
+      state = 'idle';
+
+      const chip = document.getElementById('chip-' + (currentRound + 1));
+      chip.className   = 'round-chip failed';
+      chip.textContent = 'For tidligt!';
+
+      const box = document.getElementById('reaction-box');
+      box.className   = 'too-early';
+      box.textContent = 'For tidligt! Tryk for at prøve igen.';
+
+      document.getElementById('round-info').textContent =
+        'Runde ' + (currentRound + 1) + ' tæller ikke — prøv igen.';
+    }
+
+    function registerTime() {
+      const rt = Math.round(performance.now() - startTime);
+      rounds.push(rt);
+      state = 'countdown';
+
+      const chip = document.getElementById('chip-' + (currentRound + 1));
+      chip.className   = 'round-chip done';
+      chip.textContent = 'Runde ' + (currentRound + 1) + ': ' + rt + ' ms';
+
+      currentRound++;
+
+      if (currentRound < TOTAL_ROUNDS) {
+        startCountdown();
+      } else {
+        finishTest();
+      }
+    }
+
+    function startCountdown() {
+      let count = 3;
+      const box = document.getElementById('reaction-box');
+      box.className = 'countdown';
+
+      function tick() {
+        if (count > 0) {
+          box.innerHTML =
+            '<span style="font-size:0.95rem;opacity:0.9">Gør dig klar til runde ' + (currentRound + 1) + '…</span>' +
+            '<span style="font-size:3.5rem;line-height:1">' + count + '</span>';
+          count--;
+          waitTimer = setTimeout(tick, 1000);
+        } else {
+          startRound();
+        }
+      }
+      tick();
+    }
+
+    function finishTest() {
+      const avg = Math.round(rounds.reduce((a,b) => a+b, 0) / rounds.length);
+      showResult(avg);
+    }
+
+    // ── Statistiske beregninger ───────────────────────────────
+    function calcMean(arr) {
+      return arr.reduce((a, b) => a + b, 0) / arr.length;
+    }
+
+    function calcStd(arr) {
+      const mean = calcMean(arr);
+      const variance = arr.reduce((sum, x) => sum + Math.pow(x - mean, 2), 0) / arr.length;
+      return Math.sqrt(variance);
+    }
+
+    // Kvartiler for n=5 (sorteret: x₁ x₂ x₃ x₄ x₅)
+    // Q1 = (x₁ + x₂) / 2  ·  Q3 = (x₄ + x₅) / 2  ·  IQR = Q3 − Q1
+    function calcQuartiles(arr) {
+      const s = [...arr].sort((a, b) => a - b);
+      const q1 = (s[0] + s[1]) / 2;
+      const q3 = (s[3] + s[4]) / 2;
+      const iqr = q3 - q1;
+      return { q1, q3, iqr };
+    }
+
+    function analyzeOutliers(arr) {
+      const { q1, q3, iqr } = calcQuartiles(arr);
+      // Hegn: outlier hvis xᵢ < Q1 − 0,5·IQR  eller xᵢ < Q3 + 0,5·IQR 
+      const lower = q1 - 0.5 * iqr;
+      const upper = q3 + 0.5 * iqr;
+      const outliers = arr.map((rt, i) =>
+        (rt < lower || rt > upper) ? i : -1
+      ).filter(i => i >= 0);
+      return { q1, q3, iqr, lower, upper, outliers };
+    }
+
+    function math(tex, display) {
+      return katex.renderToString(tex, { throwOnError: false, displayMode: !!display });
+    }
+
+    function toggleStdFormula() {
+      const row  = document.getElementById('std-formula-row');
+      const hint = document.getElementById('std-hint');
+      row.classList.toggle('hidden');
+      hint.textContent = row.classList.contains('hidden') ? '▼ se formel' : '▲ skjul';
+    }
+
+    function toggleDef(id) {
+      const panel = document.getElementById(id);
+      panel.classList.toggle('open');
+      const btn = panel.previousElementSibling;
+      btn.textContent = panel.classList.contains('open')
+        ? '▲ Skjul definition'
+        : '▼ Se definition af outlier';
+    }
+
+
+    // ── Resultat & verificer ──────────────────────────────────
+    function showResult(avg) {
+      updateProgress(4);
+      show('step-4');
+
+      document.getElementById('result-avg').textContent = avg;
+
+      const best = Math.min(...rounds);
+      const mean = calcMean(rounds);
+      const std  = calcStd(rounds);
+      const { q1, q3, iqr, lower, upper, outliers } = analyzeOutliers(rounds);
+      const stdRounded = std.toFixed(1);
+      const q1R  = q1.toFixed(1);
+      const q3R  = q3.toFixed(1);
+      const iqrR = iqr.toFixed(1);
+      const lowerR = lower.toFixed(0);
+      const upperR = upper.toFixed(0);
+
+      const details = document.getElementById('result-details');
+      let html = '';
+
+      // Testperson
+      html += '<div class="result-section-label">Testperson</div>';
+      html += '<div class="result-details">';
+      html += `<p><span>Navn</span><span>${personName}</span></p>`;
+      html += `<p><span>Alder</span><span>${personAge} år</span></p>`;
+      html += `<p><span>Køn</span><span>${personGender}</span></p>`;
+      html += `<p><span>Indsamlet af</span><span>${studentName}</span></p>`;
+      html += '</div>';
+
+      // Runder
+      html += '<div class="result-section-label">Runder</div>';
+      html += '<div class="result-details">';
+      rounds.forEach((rt, i) => {
+        const isBest    = rt === best;
+        const isOutlier = outliers.includes(i);
+        let cls = '';
+        if (isBest)    cls = 'best-row';
+        if (isOutlier) cls = 'outlier-row';
+        html += `<p class="${cls}">`;
+        html += `<span>Runde ${i + 1}`;
+        if (isBest)    html += '<span class="best-badge">Bedste</span>';
+        if (isOutlier) html += '<span class="best-badge" style="background:#fed7d7;color:#9b2c2c;border:none;">Udstikker</span>';
+        html += `</span><span>${rt} ms</span></p>`;
+      });
+      html += '</div>';
+
+      // Sammenfatning
+      html += '<div class="result-section-label">Sammenfatning</div>';
+      html += '<div class="result-details">';
+      html += `<p><span>Bedste tid</span><span>${best} ms</span></p>`;
+      html += `<p><span>Gennemsnit (x̄)</span><span>${avg} ms</span></p>`;
+      const stdKatex = math(
+        's = \\sqrt{\\dfrac{1}{n}\\sum_{i=1}^{n}\\left(x_i - \\bar{x}\\right)^2}', true
+      );
+      html += `<p onclick="toggleStdFormula()" style="cursor:pointer">
+        <span>Spredning (s)<span class="formel-toggle-hint" id="std-hint">▼ se formel</span></span>
+        <span>${stdRounded} ms</span>
+      </p>
+      <div class="formel-inline hidden" id="std-formula-row">
+        ${stdKatex}
+        <small>x̄ = gennemsnit &nbsp;·&nbsp; n = antal målinger</small>
+      </div>`;
+      html += '</div>';
+
+      details.innerHTML = html;
+
+      // Outlier-boks med definitions-knap
+      const box = document.getElementById('outlier-box');
+      box.classList.remove('hidden', 'warn', 'ok');
+
+      const outlierKatex = math(
+        'x_i < Q_1 - 0{,}5 \\cdot \\mathrm{IQR} \\quad \\text{eller} \\quad Q_3 + 0{,}5 \\cdot \\mathrm{IQR} < x_i',
+        true
+      );
+      const defHtml =
+        `<button class="def-toggle" onclick="toggleDef('outlier-def-panel')">▼ Se definition af outlier</button>
+         <div class="def-panel" id="outlier-def-panel">
+           En måling er en outlier hvis den ligger mere end 0,5 gange kvartilbredden (IQR)
+           uden for kvartilerne:
+           <div class="math-display">${outlierKatex}</div>
+           <div class="iqr-grid">
+             <div class="iqr-cell"><span class="iqr-label">Q₁</span>${q1R} ms</div>
+             <div class="iqr-cell"><span class="iqr-label">Q₃</span>${q3R} ms</div>
+             <div class="iqr-cell"><span class="iqr-label">IQR</span>${iqrR} ms</div>
+           </div>
+           Hegn: [${lowerR} ms ; ${upperR} ms]
+         </div>`;
+
+      if (outliers.length > 0) {
+        box.classList.add('warn');
+        const rundeTekst = outliers.map(i => 'runde ' + (i + 1)).join(' og ');
+        box.innerHTML = `<strong>Mulig fejlmåling</strong>
+          ${rundeTekst.charAt(0).toUpperCase() + rundeTekst.slice(1)} ligger uden for hegnet [${lowerR} ; ${upperR}] ms.
+          Var testpersonen uopmærksom? Overvej at lave testen om.
+          ${defHtml}`;
+      } else {
+        box.classList.add('ok');
+        box.innerHTML = `<strong>Ingen outliere</strong>
+          Alle målinger ligger inden for hegnet [${lowerR} ; ${upperR}] ms. Testen ser pålidelig ud.
+          ${defHtml}`;
+      }
+
+      // Nulstil gem-sektionen
+      document.getElementById('pre-save-buttons').classList.remove('hidden');
+      document.getElementById('post-save').classList.add('hidden');
+      document.getElementById('error-msg').style.display = 'none';
+    }
+
+    function confirmSave() {
+      document.getElementById('pre-save-buttons').classList.add('hidden');
+      saveToFirebase();
+    }
+
+    function retakeTest() {
+      resetGame();
+      updateProgress(3);
+      show('step-3');
+    }
+
+    async function saveToFirebase() {
+      const avg  = Math.round(rounds.reduce((a, b) => a + b, 0) / rounds.length);
+      const best = Math.min(...rounds);
+      try {
+        const data = {
+          elev:                 studentName,
+          testperson:           personName,
+          testperson_normalized: personName.toLowerCase().replace(/\s+/g, ' '),
+          alder:                personAge,
+          kon:                  personGender,
+          gennemsnit:           avg,
+          bedste:               best,
+          tidspunkt:            window._serverTimestamp()
+        };
+        rounds.forEach((rt, i) => { data['runde' + (i + 1)] = rt; });
+
+        await window._addDoc(window._collection(window._db, 'reaktioner'), data);
+        document.getElementById('post-save').classList.remove('hidden');
+        setTimeout(resetAll, 1200);
+      } catch (err) {
+        console.error(err);
+        document.getElementById('pre-save-buttons').classList.remove('hidden');
+        document.getElementById('error-msg').style.display = 'block';
+      }
+    }
+
+    // ── Start forfra ──────────────────────────────────────────
+    function resetAll() {
+      personName   = "";
+      personAge    = null;
+      personGender = "";
+      document.getElementById('person-name').value  = "";
+      document.getElementById('person-age').value   = "";
+      ['Mand','Kvinde','Andet'].forEach(g =>
+        document.getElementById('label-' + g.toLowerCase()).classList.remove('selected')
+      );
+      document.getElementById('saved-msg').style.display = 'none';
+      document.getElementById('error-msg').style.display = 'none';
+      updateProgress(2);
+      show('step-2');
+    }
+
+    // Gør funktioner tilgængelige fra HTML onclick
+    window.goToStep2      = goToStep2;
+    window.goToStep3      = goToStep3;
+    window.proceedToStep3 = proceedToStep3;
+    window.selectGender = selectGender;
+    window.handleClick  = handleClick;
+    window.confirmSave    = confirmSave;
+    window.retakeTest     = retakeTest;
+    window.resetAll       = resetAll;
+    window.toggleStdFormula = toggleStdFormula;
+    window.toggleDef        = toggleDef;
+  </script>
+</body>
+</html>

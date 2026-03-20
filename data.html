@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Datasæt – Reaktionstest</title>
+  <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #f0f4f8;
+      min-height: 100vh;
+      padding: 24px 16px 48px;
+      color: #1a202c;
+    }
+
+    .page-header {
+      max-width: 960px;
+      margin: 0 auto 24px;
+    }
+
+    .page-header h1 { font-size: 1.8rem; margin-bottom: 4px; }
+
+    .page-header .subtitle {
+      color: #718096;
+      font-size: 0.95rem;
+      margin-bottom: 8px;
+    }
+
+    .nav-link {
+      font-size: 0.88rem;
+      color: #4a90d9;
+      text-decoration: none;
+    }
+    .nav-link:hover { text-decoration: underline; }
+
+    .section {
+      background: white;
+      border-radius: 16px;
+      padding: 24px;
+      max-width: 960px;
+      margin: 0 auto 20px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    }
+
+    .section-title {
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #a0aec0;
+      margin-bottom: 16px;
+    }
+
+    /* Stat-kort */
+    .stat-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+    }
+
+    @media (min-width: 540px) {
+      .stat-grid { grid-template-columns: repeat(6, 1fr); }
+    }
+
+    .stat-card {
+      background: #f7fafc;
+      border-radius: 10px;
+      padding: 14px 8px;
+      text-align: center;
+    }
+
+    .stat-card .stat-value {
+      font-size: 1.3rem;
+      font-weight: 800;
+      color: #4a90d9;
+      line-height: 1.2;
+    }
+
+    .stat-card .stat-label {
+      font-size: 0.7rem;
+      color: #718096;
+      margin-top: 4px;
+    }
+
+    /* Gruppetabel */
+    .group-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.87rem;
+    }
+
+    .group-table th {
+      text-align: left;
+      padding: 8px 12px;
+      background: #f7fafc;
+      color: #4a5568;
+      font-weight: 700;
+      border-bottom: 2px solid #e2e8f0;
+    }
+
+    .group-table td {
+      padding: 9px 12px;
+      border-bottom: 1px solid #edf2f7;
+      color: #2d3748;
+    }
+
+    .group-table tr:last-child td { border-bottom: none; }
+
+    .group-table td.num { text-align: right; font-variant-numeric: tabular-nums; }
+
+    /* Tabel-sektion */
+    .table-toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .btn-download {
+      background: #38a169;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      padding: 10px 18px;
+      font-size: 0.9rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    .btn-download:hover { background: #2f855a; }
+
+    .table-wrap { overflow-x: auto; }
+
+    table.data-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.84rem;
+      white-space: nowrap;
+    }
+
+    table.data-table th {
+      padding: 10px 12px;
+      background: #f7fafc;
+      text-align: left;
+      font-weight: 700;
+      color: #4a5568;
+      border-bottom: 2px solid #e2e8f0;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    table.data-table th:hover { background: #edf2f7; }
+    table.data-table th.sorted { color: #4a90d9; }
+
+    table.data-table td {
+      padding: 9px 12px;
+      border-bottom: 1px solid #edf2f7;
+      color: #2d3748;
+    }
+
+    table.data-table tr:last-child td { border-bottom: none; }
+    table.data-table tr:hover td { background: #f7fafc; }
+    table.data-table td.num {
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .sort-icon { margin-left: 4px; font-size: 0.72rem; opacity: 0.45; }
+    th.sorted .sort-icon { opacity: 1; }
+
+    /* Loading / states */
+    .state-msg {
+      text-align: center;
+      padding: 48px 16px;
+      color: #718096;
+      font-size: 0.95rem;
+      line-height: 1.8;
+    }
+
+    .spinner {
+      display: inline-block;
+      width: 28px;
+      height: 28px;
+      border: 3px solid #e2e8f0;
+      border-top-color: #4a90d9;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin-bottom: 12px;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+
+  <div class="page-header">
+    <h1>Datasæt</h1>
+    <p class="subtitle">Reaktionstest · Deskriptiv statistik</p>
+    <a class="nav-link" href="index.html">← Tilbage til testen</a>
+  </div>
+
+  <!-- Indlæsning -->
+  <div class="section" id="loading-section">
+    <div class="state-msg">
+      <div class="spinner"></div><br>
+      Henter data fra databasen…
+    </div>
+  </div>
+
+  <!-- Fejl / tom -->
+  <div class="section hidden" id="error-section">
+    <div class="state-msg" id="error-msg-text"></div>
+  </div>
+
+  <!-- Statistik -->
+  <div class="section hidden" id="stats-section">
+    <div class="section-title" id="stats-title">Samlet statistik</div>
+    <div class="stat-grid" id="stat-cards"></div>
+
+    <div class="section-title" style="margin-top:28px;">Fordeling på køn</div>
+    <div class="table-wrap">
+      <table class="group-table">
+        <thead>
+          <tr>
+            <th>Køn</th>
+            <th class="num">n</th>
+            <th class="num">Gennemsnit</th>
+            <th class="num">Median</th>
+            <th class="num">Spredning</th>
+            <th class="num">Min</th>
+            <th class="num">Max</th>
+          </tr>
+        </thead>
+        <tbody id="gender-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Databel -->
+  <div class="section hidden" id="table-section">
+    <div class="table-toolbar">
+      <div class="section-title" style="margin-bottom:0;">Alle målinger</div>
+      <button class="btn-download" onclick="downloadExcel()">⬇ Download Excel</button>
+    </div>
+    <div class="table-wrap">
+      <table class="data-table">
+        <thead id="table-head"></thead>
+        <tbody id="table-body"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getFirestore, collection, getDocs }
+      from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey:            "AIzaSyBpPh11XsjZa5ErEJgkQIK43lTwjacx9tY",
+      authDomain:        "reaktionstest-3dd96.firebaseapp.com",
+      projectId:         "reaktionstest-3dd96",
+      storageBucket:     "reaktionstest-3dd96.firebasestorage.app",
+      messagingSenderId: "176269433635",
+      appId:             "1:176269433635:web:5db872724aeebd9fcc0a96"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db  = getFirestore(app);
+
+    // ── Kolonner ─────────────────────────────────────────────
+    const COLUMNS = [
+      { key: 'id',         label: 'ID',          numeric: false },
+      { key: 'elev',       label: 'Elev',        numeric: false },
+      { key: 'alder',      label: 'Alder',       numeric: true  },
+      { key: 'kon',        label: 'Køn',         numeric: false },
+      { key: 'runde1',     label: 'R1 (ms)',     numeric: true  },
+      { key: 'runde2',     label: 'R2 (ms)',     numeric: true  },
+      { key: 'runde3',     label: 'R3 (ms)',     numeric: true  },
+      { key: 'runde4',     label: 'R4 (ms)',     numeric: true  },
+      { key: 'runde5',     label: 'R5 (ms)',     numeric: true  },
+      { key: 'gennemsnit', label: 'Gns. (ms)',   numeric: true  },
+      { key: 'bedste',     label: 'Bedste (ms)', numeric: true  },
+    ];
+
+    let allData = [];
+    let sortCol = null;
+    let sortDir = 'asc';
+
+    // ── Hent data ─────────────────────────────────────────────
+    async function loadData() {
+    try {
+      const snap = await getDocs(collection(db, 'reaktioner'));
+
+      document.getElementById('loading-section').classList.add('hidden');
+
+      if (snap.empty) {
+        showMsg('Ingen data i databasen endnu.', '#718096');
+        return; // return fra loadData()
+      }
+
+      // Sortér efter tidsstempel (asc) i JS
+      const sorted = snap.docs
+        .map(doc => doc.data())
+        .sort((a, b) => {
+          const ta = a.tidspunkt?.seconds ?? 0;
+          const tb = b.tidspunkt?.seconds ?? 0;
+          return ta - tb;
+        });
+
+      // Anonymiser: nummerér pr. elev i tidsstempelrækkefølge
+      const elevCount = {};
+      allData = sorted.map(d => {
+        const row = { ...d };
+        elevCount[row.elev] = (elevCount[row.elev] || 0) + 1;
+        row.id = `${row.elev} tp. ${elevCount[row.elev]}`;
+        return row;
+      });
+
+      renderStats();
+      renderTable();
+      document.getElementById('stats-section').classList.remove('hidden');
+      document.getElementById('table-section').classList.remove('hidden');
+
+    } catch (err) {
+      console.error(err);
+      document.getElementById('loading-section').classList.add('hidden');
+      showMsg('Kunne ikke hente data. Tjek din internetforbindelse.', '#e53e3e');
+    }
+    } // slut på loadData()
+
+    loadData();
+
+    function showMsg(text, color) {
+      const sec = document.getElementById('error-section');
+      const msg = document.getElementById('error-msg-text');
+      msg.textContent = text;
+      msg.style.color = color;
+      sec.classList.remove('hidden');
+    }
+
+    // ── Statistik ─────────────────────────────────────────────
+    function calcStats(values) {
+      const n = values.length;
+      if (!n) return null;
+      const mean   = values.reduce((a, b) => a + b, 0) / n;
+      const sorted = [...values].sort((a, b) => a - b);
+      const median = n % 2 !== 0
+        ? sorted[Math.floor(n / 2)]
+        : (sorted[n / 2 - 1] + sorted[n / 2]) / 2;
+      const std = Math.sqrt(values.reduce((s, x) => s + (x - mean) ** 2, 0) / n);
+      return { n, mean, median, std, min: sorted[0], max: sorted[n - 1] };
+    }
+
+    function renderStats() {
+      const values = allData.map(d => d.gennemsnit);
+      const s = calcStats(values);
+      if (!s) return;
+
+      document.getElementById('stats-title').textContent =
+        `Samlet statistik (n = ${s.n})`;
+
+      const cards = [
+        { label: 'Antal',      val: s.n,      fmt: v => v         },
+        { label: 'Gennemsnit', val: s.mean,   fmt: v => Math.round(v) + ' ms' },
+        { label: 'Median',     val: s.median, fmt: v => Math.round(v) + ' ms' },
+        { label: 'Spredning',  val: s.std,    fmt: v => v.toFixed(1).replace('.', ',') + ' ms' },
+        { label: 'Min',        val: s.min,    fmt: v => v + ' ms' },
+        { label: 'Max',        val: s.max,    fmt: v => v + ' ms' },
+      ];
+
+      document.getElementById('stat-cards').innerHTML = cards.map(c =>
+        `<div class="stat-card">
+           <div class="stat-value">${c.fmt(c.val)}</div>
+           <div class="stat-label">${c.label}</div>
+         </div>`
+      ).join('');
+
+      // Kønsopdeling
+      const genders = [...new Set(allData.map(d => d.kon))].sort();
+      document.getElementById('gender-tbody').innerHTML = genders.map(g => {
+        const gs = calcStats(allData.filter(d => d.kon === g).map(d => d.gennemsnit));
+        if (!gs) return '';
+        return `<tr>
+          <td>${g}</td>
+          <td class="num">${gs.n}</td>
+          <td class="num">${Math.round(gs.mean)} ms</td>
+          <td class="num">${Math.round(gs.median)} ms</td>
+          <td class="num">${gs.std.toFixed(1).replace('.', ',')} ms</td>
+          <td class="num">${gs.min} ms</td>
+          <td class="num">${gs.max} ms</td>
+        </tr>`;
+      }).join('');
+    }
+
+    // ── Sorterbar tabel ───────────────────────────────────────
+    function getSorted() {
+      if (!sortCol) return [...allData];
+      return [...allData].sort((a, b) => {
+        const av = a[sortCol], bv = b[sortCol];
+        if (typeof av === 'number') return sortDir === 'asc' ? av - bv : bv - av;
+        return sortDir === 'asc'
+          ? String(av ?? '').localeCompare(String(bv ?? ''), 'da')
+          : String(bv ?? '').localeCompare(String(av ?? ''), 'da');
+      });
+    }
+
+    function renderTable() {
+      // Overskrifter
+      document.getElementById('table-head').innerHTML =
+        '<tr>' + COLUMNS.map(col => {
+          const active = sortCol === col.key;
+          const icon   = !active ? '↕' : sortDir === 'asc' ? '↑' : '↓';
+          return `<th class="${active ? 'sorted' : ''}" onclick="sortBy('${col.key}')">
+            ${col.label}<span class="sort-icon">${icon}</span>
+          </th>`;
+        }).join('') + '</tr>';
+
+      // Rækker
+      document.getElementById('table-body').innerHTML =
+        getSorted().map(d =>
+          '<tr>' + COLUMNS.map(col => {
+            const v = d[col.key];
+            return `<td class="${col.numeric ? 'num' : ''}">${v ?? '–'}</td>`;
+          }).join('') + '</tr>'
+        ).join('');
+    }
+
+    window.sortBy = function (col) {
+      if (sortCol === col) {
+        if (sortDir === 'asc')       sortDir = 'desc';
+        else if (sortDir === 'desc') { sortCol = null; sortDir = 'asc'; }
+      } else {
+        sortCol = col;
+        sortDir = 'asc';
+      }
+      renderTable();
+    };
+
+    // ── Excel-download ────────────────────────────────────────
+    window.downloadExcel = function () {
+      const rows = getSorted().map(d => ({
+        'ID':              d.id,
+        'Elev':            d.elev,
+        'Alder':           d.alder,
+        'Køn':             d.kon,
+        'Runde 1 (ms)':   d.runde1 ?? '',
+        'Runde 2 (ms)':   d.runde2 ?? '',
+        'Runde 3 (ms)':   d.runde3 ?? '',
+        'Runde 4 (ms)':   d.runde4 ?? '',
+        'Runde 5 (ms)':   d.runde5 ?? '',
+        'Gennemsnit (ms)': d.gennemsnit,
+        'Bedste (ms)':     d.bedste,
+      }));
+
+      const ws = XLSX.utils.json_to_sheet(rows);
+
+      // Sæt kolonnebredder
+      ws['!cols'] = [22, 16, 8, 10, 12, 12, 12, 12, 12, 16, 12]
+        .map(w => ({ wch: w }));
+
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, 'Reaktionstest');
+      XLSX.writeFile(wb, 'reaktionstest-data.xlsx');
+    };
+  </script>
+</body>
+</html>
