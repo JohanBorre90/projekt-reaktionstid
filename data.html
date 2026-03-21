@@ -16,26 +16,137 @@
       color: #1a202c;
     }
 
+    /* Header */
     .page-header {
       max-width: 960px;
       margin: 0 auto 24px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: flex-start;
+      gap: 12px;
     }
 
-    .page-header h1 { font-size: 1.8rem; margin-bottom: 4px; }
+    .page-header-left { flex: 1; }
+    .page-header-left h1 { font-size: 1.8rem; margin-bottom: 4px; }
+    .page-header-left .subtitle { color: #718096; font-size: 0.95rem; margin-bottom: 8px; }
 
-    .page-header .subtitle {
-      color: #718096;
-      font-size: 0.95rem;
-      margin-bottom: 8px;
-    }
-
-    .nav-link {
-      font-size: 0.88rem;
-      color: #4a90d9;
-      text-decoration: none;
-    }
+    .nav-link { font-size: 0.88rem; color: #4a90d9; text-decoration: none; }
     .nav-link:hover { text-decoration: underline; }
 
+    .btn-teacher-login {
+      background: #edf2f7;
+      border: none;
+      border-radius: 10px;
+      padding: 9px 16px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #4a5568;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: background 0.15s;
+      white-space: nowrap;
+      margin-top: 4px;
+    }
+    .btn-teacher-login:hover { background: #e2e8f0; }
+
+    .teacher-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #ebf8ff;
+      border: 1.5px solid #90cdf4;
+      border-radius: 10px;
+      padding: 7px 14px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #2b6cb0;
+      margin-top: 4px;
+    }
+
+    .btn-logout {
+      background: none;
+      border: none;
+      color: #e53e3e;
+      font-size: 0.78rem;
+      cursor: pointer;
+      text-decoration: underline;
+      padding: 0;
+      margin-left: 6px;
+    }
+
+    /* Modal */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.45);
+      z-index: 100;
+      align-items: center;
+      justify-content: center;
+    }
+    .modal-overlay.open { display: flex; }
+
+    .modal-box {
+      background: white;
+      border-radius: 16px;
+      padding: 28px 24px;
+      width: 100%;
+      max-width: 360px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+    }
+
+    .modal-box h2 { font-size: 1.2rem; margin-bottom: 6px; }
+    .modal-box p  { font-size: 0.88rem; color: #718096; margin-bottom: 20px; }
+
+    .modal-box input[type="password"] {
+      width: 100%;
+      padding: 10px 14px;
+      border: 2px solid #e2e8f0;
+      border-radius: 10px;
+      font-size: 1rem;
+      outline: none;
+      margin-bottom: 10px;
+    }
+    .modal-box input[type="password"]:focus { border-color: #4a90d9; }
+
+    .modal-error {
+      font-size: 0.82rem;
+      color: #e53e3e;
+      font-weight: 600;
+      min-height: 1.2rem;
+      margin-bottom: 10px;
+    }
+
+    .modal-buttons { display: flex; gap: 10px; }
+
+    .btn-primary {
+      flex: 1;
+      background: #4a90d9;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      padding: 12px;
+      font-size: 0.95rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .btn-primary:hover { background: #357abd; }
+
+    .btn-cancel {
+      background: #edf2f7;
+      color: #4a5568;
+      border: none;
+      border-radius: 10px;
+      padding: 12px 16px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .btn-cancel:hover { background: #e2e8f0; }
+
+    /* Sections */
     .section {
       background: white;
       border-radius: 16px;
@@ -60,151 +171,108 @@
       grid-template-columns: repeat(3, 1fr);
       gap: 10px;
     }
+    @media (min-width: 540px) { .stat-grid { grid-template-columns: repeat(6, 1fr); } }
 
-    @media (min-width: 540px) {
-      .stat-grid { grid-template-columns: repeat(6, 1fr); }
-    }
-
-    .stat-card {
-      background: #f7fafc;
-      border-radius: 10px;
-      padding: 14px 8px;
-      text-align: center;
-    }
-
-    .stat-card .stat-value {
-      font-size: 1.3rem;
-      font-weight: 800;
-      color: #4a90d9;
-      line-height: 1.2;
-    }
-
-    .stat-card .stat-label {
-      font-size: 0.7rem;
-      color: #718096;
-      margin-top: 4px;
-    }
+    .stat-card { background: #f7fafc; border-radius: 10px; padding: 14px 8px; text-align: center; }
+    .stat-card .stat-value { font-size: 1.3rem; font-weight: 800; color: #4a90d9; line-height: 1.2; }
+    .stat-card .stat-label { font-size: 0.7rem; color: #718096; margin-top: 4px; }
 
     /* Gruppetabel */
-    .group-table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 0.87rem;
-    }
-
+    .group-table { width: 100%; border-collapse: collapse; font-size: 0.87rem; }
     .group-table th {
-      text-align: left;
-      padding: 8px 12px;
-      background: #f7fafc;
-      color: #4a5568;
-      font-weight: 700;
-      border-bottom: 2px solid #e2e8f0;
+      text-align: left; padding: 8px 12px; background: #f7fafc;
+      color: #4a5568; font-weight: 700; border-bottom: 2px solid #e2e8f0;
     }
-
-    .group-table td {
-      padding: 9px 12px;
-      border-bottom: 1px solid #edf2f7;
-      color: #2d3748;
-    }
-
+    .group-table td { padding: 9px 12px; border-bottom: 1px solid #edf2f7; color: #2d3748; }
     .group-table tr:last-child td { border-bottom: none; }
-
     .group-table td.num { text-align: right; font-variant-numeric: tabular-nums; }
 
-    /* Tabel-sektion */
+    /* Data-tabel */
     .table-toolbar {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 10px;
-      margin-bottom: 16px;
+      display: flex; justify-content: space-between; align-items: center;
+      flex-wrap: wrap; gap: 10px; margin-bottom: 16px;
     }
 
     .btn-download {
-      background: #38a169;
-      color: white;
-      border: none;
-      border-radius: 10px;
-      padding: 10px 18px;
-      font-size: 0.9rem;
-      font-weight: 700;
-      cursor: pointer;
+      background: #38a169; color: white; border: none; border-radius: 10px;
+      padding: 10px 18px; font-size: 0.9rem; font-weight: 700; cursor: pointer;
       transition: background 0.15s;
     }
-
     .btn-download:hover { background: #2f855a; }
 
     .table-wrap { overflow-x: auto; }
 
-    table.data-table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 0.84rem;
-      white-space: nowrap;
-    }
+    table.data-table { width: 100%; border-collapse: collapse; font-size: 0.84rem; white-space: nowrap; }
 
     table.data-table th {
-      padding: 10px 12px;
-      background: #f7fafc;
-      text-align: left;
-      font-weight: 700;
-      color: #4a5568;
-      border-bottom: 2px solid #e2e8f0;
-      cursor: pointer;
-      user-select: none;
+      padding: 10px 12px; background: #f7fafc; text-align: left;
+      font-weight: 700; color: #4a5568; border-bottom: 2px solid #e2e8f0;
+      cursor: pointer; user-select: none;
     }
-
-    table.data-table th:hover { background: #edf2f7; }
+    table.data-table th.no-sort { cursor: default; }
+    table.data-table th:hover:not(.no-sort) { background: #edf2f7; }
     table.data-table th.sorted { color: #4a90d9; }
 
-    table.data-table td {
-      padding: 9px 12px;
-      border-bottom: 1px solid #edf2f7;
-      color: #2d3748;
-    }
-
+    table.data-table td { padding: 9px 12px; border-bottom: 1px solid #edf2f7; color: #2d3748; }
     table.data-table tr:last-child td { border-bottom: none; }
     table.data-table tr:hover td { background: #f7fafc; }
-    table.data-table td.num {
-      text-align: right;
-      font-variant-numeric: tabular-nums;
-    }
+    table.data-table td.num { text-align: right; font-variant-numeric: tabular-nums; }
 
     .sort-icon { margin-left: 4px; font-size: 0.72rem; opacity: 0.45; }
     th.sorted .sort-icon { opacity: 1; }
 
+    /* Slet-knap */
+    .btn-delete {
+      background: none;
+      border: 1.5px solid #fed7d7;
+      border-radius: 6px;
+      color: #e53e3e;
+      font-size: 0.78rem;
+      font-weight: 600;
+      padding: 3px 10px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .btn-delete:hover { background: #fff5f5; border-color: #e53e3e; }
+
     /* Loading / states */
-    .state-msg {
-      text-align: center;
-      padding: 48px 16px;
-      color: #718096;
-      font-size: 0.95rem;
-      line-height: 1.8;
-    }
-
+    .state-msg { text-align: center; padding: 48px 16px; color: #718096; font-size: 0.95rem; line-height: 1.8; }
     .spinner {
-      display: inline-block;
-      width: 28px;
-      height: 28px;
-      border: 3px solid #e2e8f0;
-      border-top-color: #4a90d9;
-      border-radius: 50%;
-      animation: spin 0.8s linear infinite;
-      margin-bottom: 12px;
+      display: inline-block; width: 28px; height: 28px;
+      border: 3px solid #e2e8f0; border-top-color: #4a90d9;
+      border-radius: 50%; animation: spin 0.8s linear infinite; margin-bottom: 12px;
     }
-
     @keyframes spin { to { transform: rotate(360deg); } }
-
     .hidden { display: none !important; }
   </style>
 </head>
 <body>
 
+  <!-- Login-modal -->
+  <div class="modal-overlay" id="login-modal">
+    <div class="modal-box">
+      <h2>Lærer-login</h2>
+      <p>Indtast adgangskoden for at se navne og slette data.</p>
+      <input type="password" id="password-input" placeholder="Adgangskode"
+             onkeydown="if(event.key==='Enter') checkPassword()" />
+      <div class="modal-error" id="modal-error"></div>
+      <div class="modal-buttons">
+        <button class="btn-primary" onclick="checkPassword()">Log ind</button>
+        <button class="btn-cancel" onclick="closeModal()">Annuller</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Header -->
   <div class="page-header">
-    <h1>Datasæt</h1>
-    <p class="subtitle">Reaktionstest · Deskriptiv statistik</p>
-    <a class="nav-link" href="index.html">← Tilbage til testen</a>
+    <div class="page-header-left">
+      <h1>Datasæt</h1>
+      <p class="subtitle">Reaktionstest · Deskriptiv statistik</p>
+      <a class="nav-link" href="index.html">← Tilbage til testen</a>
+    </div>
+    <div id="login-area">
+      <button class="btn-teacher-login" onclick="openModal()">🔒 Lærer</button>
+    </div>
   </div>
 
   <!-- Indlæsning -->
@@ -260,8 +328,13 @@
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-    import { getFirestore, collection, getDocs }
+    import { getFirestore, collection, getDocs, doc, deleteDoc }
       from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+    // ============================================================
+    //  SKIFT DETTE TIL DIN EGEN ADGANGSKODE
+    const TEACHER_PASSWORD = 'lærer2025';
+    // ============================================================
 
     const firebaseConfig = {
       apiKey:            "AIzaSyBpPh11XsjZa5ErEJgkQIK43lTwjacx9tY",
@@ -276,7 +349,7 @@
     const db  = getFirestore(app);
 
     // ── Kolonner ─────────────────────────────────────────────
-    const COLUMNS = [
+    const COLUMNS_BASE = [
       { key: 'id',         label: 'ID',          numeric: false },
       { key: 'elev',       label: 'Elev',        numeric: false },
       { key: 'alder',      label: 'Alder',       numeric: true  },
@@ -290,59 +363,60 @@
       { key: 'bedste',     label: 'Bedste (ms)', numeric: true  },
     ];
 
-    let allData = [];
-    let sortCol = null;
-    let sortDir = 'asc';
+    // Ekstra kolonner i lærer-tilstand (navn + slet)
+    const COL_NAVN  = { key: 'testperson', label: 'Navn',  numeric: false };
+    const COL_SLET  = { key: '_slet',      label: 'Slet',  numeric: false, noSort: true };
+
+    let allData    = [];
+    let sortCol    = null;
+    let sortDir    = 'asc';
+    let teacherMode = false;
+
+    function getColumns() {
+      if (!teacherMode) return COLUMNS_BASE;
+      return [COLUMNS_BASE[0], COL_NAVN, ...COLUMNS_BASE.slice(1), COL_SLET];
+    }
 
     // ── Hent data ─────────────────────────────────────────────
     async function loadData() {
-    try {
-      const snap = await getDocs(collection(db, 'reaktioner'));
+      try {
+        const snap = await getDocs(collection(db, 'reaktioner'));
+        document.getElementById('loading-section').classList.add('hidden');
 
-      document.getElementById('loading-section').classList.add('hidden');
+        if (snap.empty) {
+          showMsg('Ingen data i databasen endnu.', '#718096');
+          return;
+        }
 
-      if (snap.empty) {
-        showMsg('Ingen data i databasen endnu.', '#718096');
-        return; // return fra loadData()
-      }
+        const sorted = snap.docs
+          .map(doc => ({ _docId: doc.id, ...doc.data() }))
+          .sort((a, b) => (a.tidspunkt?.seconds ?? 0) - (b.tidspunkt?.seconds ?? 0));
 
-      // Sortér efter tidsstempel (asc) i JS
-      const sorted = snap.docs
-        .map(doc => doc.data())
-        .sort((a, b) => {
-          const ta = a.tidspunkt?.seconds ?? 0;
-          const tb = b.tidspunkt?.seconds ?? 0;
-          return ta - tb;
+        const elevCount = {};
+        allData = sorted.map(d => {
+          elevCount[d.elev] = (elevCount[d.elev] || 0) + 1;
+          d.id = `${d.elev} tp. ${elevCount[d.elev]}`;
+          return d;
         });
 
-      // Anonymiser: nummerér pr. elev i tidsstempelrækkefølge
-      const elevCount = {};
-      allData = sorted.map(d => {
-        const row = { ...d };
-        elevCount[row.elev] = (elevCount[row.elev] || 0) + 1;
-        row.id = `${row.elev} tp. ${elevCount[row.elev]}`;
-        return row;
-      });
+        renderStats();
+        renderTable();
+        document.getElementById('stats-section').classList.remove('hidden');
+        document.getElementById('table-section').classList.remove('hidden');
 
-      renderStats();
-      renderTable();
-      document.getElementById('stats-section').classList.remove('hidden');
-      document.getElementById('table-section').classList.remove('hidden');
-
-    } catch (err) {
-      console.error(err);
-      document.getElementById('loading-section').classList.add('hidden');
-      showMsg('Kunne ikke hente data. Tjek din internetforbindelse.', '#e53e3e');
+      } catch (err) {
+        console.error(err);
+        document.getElementById('loading-section').classList.add('hidden');
+        showMsg('Kunne ikke hente data. Tjek din internetforbindelse.', '#e53e3e');
+      }
     }
-    } // slut på loadData()
 
     loadData();
 
     function showMsg(text, color) {
       const sec = document.getElementById('error-section');
-      const msg = document.getElementById('error-msg-text');
-      msg.textContent = text;
-      msg.style.color = color;
+      document.getElementById('error-msg-text').textContent = text;
+      document.getElementById('error-msg-text').style.color = color;
       sec.classList.remove('hidden');
     }
 
@@ -360,15 +434,13 @@
     }
 
     function renderStats() {
-      const values = allData.map(d => d.gennemsnit);
-      const s = calcStats(values);
+      const s = calcStats(allData.map(d => d.gennemsnit));
       if (!s) return;
 
-      document.getElementById('stats-title').textContent =
-        `Samlet statistik (n = ${s.n})`;
+      document.getElementById('stats-title').textContent = `Samlet statistik (n = ${s.n})`;
 
       const cards = [
-        { label: 'Antal',      val: s.n,      fmt: v => v         },
+        { label: 'Antal',      val: s.n,      fmt: v => v },
         { label: 'Gennemsnit', val: s.mean,   fmt: v => Math.round(v) + ' ms' },
         { label: 'Median',     val: s.median, fmt: v => Math.round(v) + ' ms' },
         { label: 'Spredning',  val: s.std,    fmt: v => v.toFixed(1).replace('.', ',') + ' ms' },
@@ -383,7 +455,6 @@
          </div>`
       ).join('');
 
-      // Kønsopdeling
       const genders = [...new Set(allData.map(d => d.kon))].sort();
       document.getElementById('gender-tbody').innerHTML = genders.map(g => {
         const gs = calcStats(allData.filter(d => d.kon === g).map(d => d.gennemsnit));
@@ -413,9 +484,11 @@
     }
 
     function renderTable() {
-      // Overskrifter
+      const cols = getColumns();
+
       document.getElementById('table-head').innerHTML =
-        '<tr>' + COLUMNS.map(col => {
+        '<tr>' + cols.map(col => {
+          if (col.noSort) return `<th class="no-sort">${col.label}</th>`;
           const active = sortCol === col.key;
           const icon   = !active ? '↕' : sortDir === 'asc' ? '↑' : '↓';
           return `<th class="${active ? 'sorted' : ''}" onclick="sortBy('${col.key}')">
@@ -423,12 +496,13 @@
           </th>`;
         }).join('') + '</tr>';
 
-      // Rækker
       document.getElementById('table-body').innerHTML =
         getSorted().map(d =>
-          '<tr>' + COLUMNS.map(col => {
-            const v = d[col.key];
-            return `<td class="${col.numeric ? 'num' : ''}">${v ?? '–'}</td>`;
+          '<tr>' + cols.map(col => {
+            if (col.key === '_slet') {
+              return `<td><button class="btn-delete" onclick="deleteEntry('${d._docId}', '${d.id}')">Slet</button></td>`;
+            }
+            return `<td class="${col.numeric ? 'num' : ''}">${d[col.key] ?? '–'}</td>`;
           }).join('') + '</tr>'
         ).join('');
     }
@@ -437,39 +511,92 @@
       if (sortCol === col) {
         if (sortDir === 'asc')       sortDir = 'desc';
         else if (sortDir === 'desc') { sortCol = null; sortDir = 'asc'; }
-      } else {
-        sortCol = col;
-        sortDir = 'asc';
-      }
+      } else { sortCol = col; sortDir = 'asc'; }
       renderTable();
+    };
+
+    // ── Slet post ─────────────────────────────────────────────
+    window.deleteEntry = async function (docId, label) {
+      if (!confirm(`Slet "${label}" fra databasen? Dette kan ikke fortrydes.`)) return;
+      try {
+        await deleteDoc(doc(db, 'reaktioner', docId));
+        allData = allData.filter(d => d._docId !== docId);
+        renderStats();
+        renderTable();
+      } catch (err) {
+        console.error(err);
+        alert('Kunne ikke slette. Prøv igen.');
+      }
     };
 
     // ── Excel-download ────────────────────────────────────────
     window.downloadExcel = function () {
-      const rows = getSorted().map(d => ({
-        'ID':              d.id,
-        'Elev':            d.elev,
-        'Alder':           d.alder,
-        'Køn':             d.kon,
-        'Runde 1 (ms)':   d.runde1 ?? '',
-        'Runde 2 (ms)':   d.runde2 ?? '',
-        'Runde 3 (ms)':   d.runde3 ?? '',
-        'Runde 4 (ms)':   d.runde4 ?? '',
-        'Runde 5 (ms)':   d.runde5 ?? '',
-        'Gennemsnit (ms)': d.gennemsnit,
-        'Bedste (ms)':     d.bedste,
-      }));
+      const rows = getSorted().map(d => {
+        const row = {
+          'ID':              d.id,
+          'Elev':            d.elev,
+          'Alder':           d.alder,
+          'Køn':             d.kon,
+          'Runde 1 (ms)':   d.runde1 ?? '',
+          'Runde 2 (ms)':   d.runde2 ?? '',
+          'Runde 3 (ms)':   d.runde3 ?? '',
+          'Runde 4 (ms)':   d.runde4 ?? '',
+          'Runde 5 (ms)':   d.runde5 ?? '',
+          'Gennemsnit (ms)': d.gennemsnit,
+          'Bedste (ms)':     d.bedste,
+        };
+        if (teacherMode) row['Navn (testperson)'] = d.testperson;
+        return row;
+      });
 
       const ws = XLSX.utils.json_to_sheet(rows);
-
-      // Sæt kolonnebredder
-      ws['!cols'] = [22, 16, 8, 10, 12, 12, 12, 12, 12, 16, 12]
-        .map(w => ({ wch: w }));
-
+      ws['!cols'] = [22, 16, 8, 10, 12, 12, 12, 12, 12, 16, 12, 20].map(w => ({ wch: w }));
       const wb = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(wb, ws, 'Reaktionstest');
       XLSX.writeFile(wb, 'reaktionstest-data.xlsx');
     };
+
+    // ── Login / modal ─────────────────────────────────────────
+    window.openModal = function () {
+      document.getElementById('password-input').value = '';
+      document.getElementById('modal-error').textContent = '';
+      document.getElementById('login-modal').classList.add('open');
+      setTimeout(() => document.getElementById('password-input').focus(), 50);
+    };
+
+    window.closeModal = function () {
+      document.getElementById('login-modal').classList.remove('open');
+    };
+
+    window.checkPassword = function () {
+      const val = document.getElementById('password-input').value;
+      if (val === TEACHER_PASSWORD) {
+        teacherMode = true;
+        closeModal();
+        document.getElementById('login-area').innerHTML =
+          `<div class="teacher-badge">
+             🔓 Logget ind som lærer
+             <button class="btn-logout" onclick="logout()">Log ud</button>
+           </div>`;
+        renderTable();
+      } else {
+        document.getElementById('modal-error').textContent = 'Forkert adgangskode.';
+        document.getElementById('password-input').value = '';
+        document.getElementById('password-input').focus();
+      }
+    };
+
+    window.logout = function () {
+      teacherMode = false;
+      document.getElementById('login-area').innerHTML =
+        `<button class="btn-teacher-login" onclick="openModal()">🔒 Lærer</button>`;
+      renderTable();
+    };
+
+    // Luk modal ved klik på overlay
+    document.getElementById('login-modal').addEventListener('click', function (e) {
+      if (e.target === this) closeModal();
+    });
   </script>
 </body>
 </html>
