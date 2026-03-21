@@ -457,6 +457,186 @@
       display: none !important;
     }
 
+    /* ── Lærer-login ─────────────────────────────────────────── */
+    .header-wrap {
+      position: relative;
+      width: 100%;
+      max-width: 480px;
+      text-align: center;
+    }
+
+    .teacher-btn {
+      position: absolute;
+      top: 0;
+      right: 0;
+      background: none;
+      border: 1.5px solid #cbd5e0;
+      border-radius: 8px;
+      padding: 5px 10px;
+      font-size: 0.8rem;
+      cursor: pointer;
+      color: #718096;
+    }
+
+    .teacher-btn:hover { background: #edf2f7; }
+
+    .teacher-badge {
+      position: absolute;
+      top: 0;
+      right: 0;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.8rem;
+      color: #2b6cb0;
+      background: #ebf4ff;
+      border: 1.5px solid #bee3f8;
+      border-radius: 8px;
+      padding: 5px 10px;
+    }
+
+    .teacher-badge button {
+      background: none;
+      border: none;
+      color: #718096;
+      font-size: 0.75rem;
+      cursor: pointer;
+      padding: 0;
+      text-decoration: underline;
+    }
+
+    /* Modal */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.45);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+
+    .modal-box {
+      background: white;
+      border-radius: 16px;
+      padding: 28px 24px;
+      width: 90%;
+      max-width: 360px;
+      box-shadow: 0 8px 40px rgba(0,0,0,0.18);
+    }
+
+    .modal-box h3 { font-size: 1.1rem; margin-bottom: 16px; }
+
+    .modal-box input[type="password"] {
+      width: 100%;
+      padding: 10px 14px;
+      border: 2px solid #e2e8f0;
+      border-radius: 10px;
+      font-size: 1rem;
+      margin-bottom: 12px;
+      outline: none;
+      background: #f7fafc;
+      color: #1a202c;
+    }
+
+    .modal-box input[type="password"]:focus { border-color: #4a90d9; background: white; }
+
+    .modal-error {
+      color: #e53e3e;
+      font-size: 0.85rem;
+      margin-bottom: 10px;
+      min-height: 1.2em;
+    }
+
+    .modal-actions { display: flex; gap: 8px; }
+    .modal-actions .btn { margin-top: 0; flex: 1; }
+
+    /* Lærer-panel */
+    .teacher-panel {
+      background: white;
+      border-radius: 16px;
+      padding: 20px 24px;
+      width: 100%;
+      max-width: 480px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+      margin-bottom: 16px;
+      border: 2px solid #bee3f8;
+    }
+
+    .teacher-panel h3 { font-size: 1rem; margin-bottom: 14px; color: #2b6cb0; }
+
+    .name-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 14px;
+      min-height: 32px;
+    }
+
+    .name-chip {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      background: #ebf4ff;
+      border: 1.5px solid #bee3f8;
+      border-radius: 20px;
+      padding: 4px 10px;
+      font-size: 0.88rem;
+      color: #2b6cb0;
+    }
+
+    .name-chip button {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: #718096;
+      font-size: 1rem;
+      padding: 0;
+      line-height: 1;
+    }
+
+    .name-chip button:hover { color: #e53e3e; }
+
+    .add-name-row {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .add-name-row input {
+      flex: 1;
+      padding: 8px 12px;
+      border: 2px solid #e2e8f0;
+      border-radius: 10px;
+      font-size: 0.95rem;
+      outline: none;
+      background: #f7fafc;
+      color: #1a202c;
+      margin-bottom: 0;
+    }
+
+    .add-name-row input:focus { border-color: #4a90d9; background: white; }
+
+    .add-name-row .btn-add {
+      padding: 8px 16px;
+      background: #4a90d9;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .add-name-row .btn-add:hover { background: #357abd; }
+
+    .panel-status {
+      font-size: 0.85rem;
+      color: #38a169;
+      min-height: 1.2em;
+      margin-top: 6px;
+    }
+
     .progress-bar {
       display: flex;
       gap: 6px;
@@ -482,9 +662,44 @@
 </head>
 <body>
 
-  <h1>Reaktionstest</h1>
-  <p class="subtitle">Matematik · Deskriptiv statistik</p>
-  <a href="data.html" style="font-size:0.85rem; color:#4a90d9; text-decoration:none; margin-bottom:8px; display:inline-block;">Se datasæt →</a>
+  <!-- Header -->
+  <div class="header-wrap">
+    <h1>Reaktionstest</h1>
+    <p class="subtitle">Matematik · Deskriptiv statistik</p>
+    <a href="data.html" style="font-size:0.85rem; color:#4a90d9; text-decoration:none; margin-bottom:8px; display:inline-block;">Se datasæt →</a>
+    <button class="teacher-btn" id="teacher-login-btn" onclick="openTeacherModal()">🔒 Lærer</button>
+    <div class="teacher-badge hidden" id="teacher-badge">
+      <span>👩‍🏫 Lærer</span>
+      <button onclick="teacherLogout()">Log ud</button>
+    </div>
+  </div>
+
+  <!-- Lærer-login modal -->
+  <div class="modal-overlay hidden" id="teacher-modal" onclick="handleModalOverlayClick(event)">
+    <div class="modal-box" onclick="event.stopPropagation()">
+      <h3>🔒 Lærer-login</h3>
+      <input type="password" id="teacher-pw-input" placeholder="Adgangskode"
+             onkeydown="if(event.key==='Enter') submitTeacherLogin()" />
+      <p class="modal-error" id="modal-error"></p>
+      <div class="modal-actions">
+        <button class="btn btn-secondary" onclick="closeTeacherModal()">Annuller</button>
+        <button class="btn btn-primary" onclick="submitTeacherLogin()">Log ind</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Lærer-panel: rediger elevliste -->
+  <div class="teacher-panel hidden" id="teacher-panel">
+    <h3>Rediger elevliste</h3>
+    <div class="name-chips" id="name-chips-container"></div>
+    <div class="add-name-row">
+      <input type="text" id="new-name-input" placeholder="Tilføj navn…"
+             onkeydown="if(event.key==='Enter') addStudentName()" />
+      <button class="btn-add" onclick="addStudentName()">Tilføj</button>
+    </div>
+    <button class="btn btn-primary" style="width:auto;padding:10px 24px;" onclick="saveStudentList()">Gem liste</button>
+    <p class="panel-status" id="panel-status"></p>
+  </div>
 
   <!-- Fremgangsindikator -->
   <div class="progress-bar" id="progress-bar">
@@ -501,37 +716,6 @@
     <label for="student-select">Vælg dit navn (elev)</label>
     <select id="student-select">
       <option value="">— Vælg dit navn —</option>
-      <!-- Tilføj elevnavne her -->
-      <option>Ahmed</option>
-      <option>Alberte</option>
-      <option>Camilla</option>
-      <option>Christian</option>
-      <option>Emma</option>
-      <option>Frederik</option>
-      <option>Gustav</option>
-      <option>Ida</option>
-      <option>Jonas</option>
-      <option>Julie</option>
-      <option>Katrine</option>
-      <option>Lars</option>
-      <option>Laura</option>
-      <option>Luca</option>
-      <option>Maja</option>
-      <option>Marcus</option>
-      <option>Marie</option>
-      <option>Mathias</option>
-      <option>Mikkel</option>
-      <option>Nicolai</option>
-      <option>Oliver</option>
-      <option>Oskar</option>
-      <option>Rasmus</option>
-      <option>Sara</option>
-      <option>Sebastian</option>
-      <option>Simone</option>
-      <option>Sofia</option>
-      <option>Thomas</option>
-      <option>Victor</option>
-      <option>Villads</option>
     </select>
     <button class="btn btn-primary" onclick="goToStep2()">Fortsæt</button>
   </div>
@@ -628,7 +812,8 @@
   <!-- Firebase SDK -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-    import { getFirestore, collection, addDoc, getDocs, query, where, serverTimestamp }
+    import { getFirestore, collection, addDoc, getDocs, query, where, serverTimestamp,
+             doc, getDoc, setDoc }
       from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
     // ============================================================
@@ -656,9 +841,160 @@
     window._query           = query;
     window._where           = where;
     window._serverTimestamp = serverTimestamp;
+    window._doc             = doc;
+    window._getDoc          = getDoc;
+    window._setDoc          = setDoc;
+
+    // Hent elevliste fra Firestore (hvis den findes)
+    async function loadStudentList() {
+      try {
+        const snap = await getDoc(doc(db, 'config', 'elevliste'));
+        if (snap.exists()) {
+          const navne = snap.data().navne;
+          if (Array.isArray(navne) && navne.length > 0) {
+            window._populateStudentSelect(navne);
+          }
+        }
+      } catch (e) {
+        // Ingen forbindelse — brug de hardkodede navne
+      }
+    }
+    loadStudentList();
   </script>
 
   <script>
+    // ============================================================
+    //  SKIFT DETTE TIL DIN EGEN ADGANGSKODE
+    const TEACHER_PASSWORD = 'lærer2025';
+    // ============================================================
+
+    // Standard elevliste (bruges hvis Firestore ikke har en liste)
+    const DEFAULT_NAMES = [
+      'Ahmed','Alberte','Camilla','Christian','Emma','Frederik',
+      'Gustav','Ida','Jonas','Julie','Katrine','Lars','Laura',
+      'Luca','Maja','Marcus','Marie','Mathias','Mikkel','Nicolai',
+      'Oliver','Oskar','Rasmus','Sara','Sebastian','Simone',
+      'Sofia','Thomas','Victor','Villads'
+    ];
+
+    let teacherMode = false;
+    let currentNames = [...DEFAULT_NAMES];
+
+    // Populer <select> med navne
+    function populateSelect(names) {
+      const sel = document.getElementById('student-select');
+      const prev = sel.value;
+      sel.innerHTML = '<option value="">— Vælg dit navn —</option>';
+      names.slice().sort().forEach(n => {
+        const opt = document.createElement('option');
+        opt.textContent = n;
+        sel.appendChild(opt);
+      });
+      if (prev && names.includes(prev)) sel.value = prev;
+    }
+
+    // Gør tilgængeligt for modul-scriptet
+    window._populateStudentSelect = function(names) {
+      currentNames = [...names];
+      populateSelect(currentNames);
+    };
+
+    // Initialiser med standardlisten straks (overskrives af Firestore hvis muligt)
+    populateSelect(currentNames);
+
+    // ── Lærer-login ───────────────────────────────────────────
+    function openTeacherModal() {
+      document.getElementById('teacher-pw-input').value = '';
+      document.getElementById('modal-error').textContent = '';
+      document.getElementById('teacher-modal').classList.remove('hidden');
+      setTimeout(() => document.getElementById('teacher-pw-input').focus(), 50);
+    }
+
+    function closeTeacherModal() {
+      document.getElementById('teacher-modal').classList.add('hidden');
+    }
+
+    function handleModalOverlayClick(e) {
+      if (e.target === document.getElementById('teacher-modal')) closeTeacherModal();
+    }
+
+    function submitTeacherLogin() {
+      const pw = document.getElementById('teacher-pw-input').value;
+      if (pw === TEACHER_PASSWORD) {
+        teacherMode = true;
+        closeTeacherModal();
+        document.getElementById('teacher-login-btn').classList.add('hidden');
+        document.getElementById('teacher-badge').classList.remove('hidden');
+        document.getElementById('teacher-panel').classList.remove('hidden');
+        renderNameChips();
+      } else {
+        document.getElementById('modal-error').textContent = 'Forkert adgangskode.';
+        document.getElementById('teacher-pw-input').value = '';
+        document.getElementById('teacher-pw-input').focus();
+      }
+    }
+
+    function teacherLogout() {
+      teacherMode = false;
+      document.getElementById('teacher-login-btn').classList.remove('hidden');
+      document.getElementById('teacher-badge').classList.add('hidden');
+      document.getElementById('teacher-panel').classList.add('hidden');
+    }
+
+    // ── Rediger elevliste ─────────────────────────────────────
+    function renderNameChips() {
+      const container = document.getElementById('name-chips-container');
+      container.innerHTML = '';
+      currentNames.slice().sort().forEach(name => {
+        const chip = document.createElement('div');
+        chip.className = 'name-chip';
+        chip.innerHTML = `<span>${name}</span>
+          <button onclick="removeStudentName('${name.replace(/'/g, "\\'")}')" title="Fjern">×</button>`;
+        container.appendChild(chip);
+      });
+    }
+
+    function addStudentName() {
+      const input = document.getElementById('new-name-input');
+      const name = input.value.trim();
+      if (!name) return;
+      if (currentNames.map(n => n.toLowerCase()).includes(name.toLowerCase())) {
+        document.getElementById('panel-status').style.color = '#e53e3e';
+        document.getElementById('panel-status').textContent = `"${name}" er allerede på listen.`;
+        return;
+      }
+      currentNames.push(name);
+      input.value = '';
+      document.getElementById('panel-status').textContent = '';
+      renderNameChips();
+      populateSelect(currentNames);
+    }
+
+    function removeStudentName(name) {
+      currentNames = currentNames.filter(n => n !== name);
+      renderNameChips();
+      populateSelect(currentNames);
+      document.getElementById('panel-status').textContent = '';
+    }
+
+    async function saveStudentList() {
+      const status = document.getElementById('panel-status');
+      status.style.color = '#718096';
+      status.textContent = 'Gemmer…';
+      try {
+        await window._setDoc(
+          window._doc(window._db, 'config', 'elevliste'),
+          { navne: currentNames }
+        );
+        status.style.color = '#38a169';
+        status.textContent = 'Listen er gemt!';
+        setTimeout(() => { if (status.textContent === 'Listen er gemt!') status.textContent = ''; }, 3000);
+      } catch (e) {
+        status.style.color = '#e53e3e';
+        status.textContent = 'Kunne ikke gemme. Tjek din forbindelse.';
+      }
+    }
+
     // ── Tilstand ──────────────────────────────────────────────
     let studentName = "";
     let personName  = "";
@@ -1129,6 +1465,14 @@
     window.resetAll       = resetAll;
     window.toggleStdFormula = toggleStdFormula;
     window.toggleDef        = toggleDef;
+    window.openTeacherModal     = openTeacherModal;
+    window.closeTeacherModal    = closeTeacherModal;
+    window.handleModalOverlayClick = handleModalOverlayClick;
+    window.submitTeacherLogin   = submitTeacherLogin;
+    window.teacherLogout        = teacherLogout;
+    window.addStudentName       = addStudentName;
+    window.removeStudentName    = removeStudentName;
+    window.saveStudentList      = saveStudentList;
   </script>
 </body>
 </html>
