@@ -486,7 +486,9 @@
       }
     }
 
-    loadData();
+    loadData().then(() => {
+      if (new URLSearchParams(location.search).has('top3')) toggleTop3();
+    });
 
     function showMsg(text, color) {
       const sec = document.getElementById('error-section');
@@ -619,7 +621,7 @@
       const medals = ['gold', 'silver', 'bronze'];
       const icons  = ['🥇', '🥈', '🥉'];
       const top = [...allData]
-        .sort((a, b) => a.bedste - b.bedste)
+        .sort((a, b) => a.gennemsnit - b.gennemsnit)
         .slice(0, 3);
 
       document.getElementById('podium-container').innerHTML = top.map((d, i) =>
@@ -627,8 +629,8 @@
            <div class="podium-card">
              <div class="podium-medal">${icons[i]}</div>
              <div class="podium-name">${d.testperson ?? d.id}</div>
-             <div class="podium-time">${d.bedste}</div>
-             <div class="podium-unit">ms</div>
+             <div class="podium-time">${d.gennemsnit}</div>
+             <div class="podium-unit">ms (gns.)</div>
              <div class="podium-rank">Elev: ${d.elev}</div>
            </div>
          </div>`
