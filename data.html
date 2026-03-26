@@ -235,6 +235,69 @@
     }
     .btn-delete:hover { background: #fff5f5; border-color: #e53e3e; }
 
+    /* Top-3 */
+    .top3-section {
+      background: white;
+      border-radius: 16px;
+      padding: 24px;
+      max-width: 960px;
+      margin: 0 auto 20px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    }
+
+    .top3-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+
+    .podium {
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      gap: 12px;
+    }
+
+    .podium-item {
+      flex: 1;
+      max-width: 180px;
+      text-align: center;
+    }
+
+    .podium-card {
+      border-radius: 12px;
+      padding: 16px 10px 12px;
+      position: relative;
+    }
+
+    .podium-item.gold   .podium-card { background: #fffbeb; border: 2px solid #f6e05e; }
+    .podium-item.silver .podium-card { background: #f7fafc; border: 2px solid #cbd5e0; }
+    .podium-item.bronze .podium-card { background: #fff5f0; border: 2px solid #fbd38d; }
+
+    .podium-medal { font-size: 2rem; margin-bottom: 6px; }
+    .podium-name  { font-size: 0.9rem; font-weight: 700; color: #2d3748; margin-bottom: 4px; word-break: break-word; }
+    .podium-time  { font-size: 1.4rem; font-weight: 800; color: #4a90d9; }
+    .podium-unit  { font-size: 0.72rem; color: #718096; }
+    .podium-rank  { font-size: 0.75rem; color: #a0aec0; margin-top: 4px; }
+
+    .podium-item.gold   { order: 2; }
+    .podium-item.silver { order: 1; }
+    .podium-item.bronze { order: 3; }
+
+    .btn-top3 {
+      background: #f6e05e;
+      color: #744210;
+      border: none;
+      border-radius: 10px;
+      padding: 10px 18px;
+      font-size: 0.9rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .btn-top3:hover { background: #ecc94b; }
+
     /* Loading / states */
     .state-msg { text-align: center; padding: 48px 16px; color: #718096; font-size: 0.95rem; line-height: 1.8; }
     .spinner {
@@ -312,11 +375,23 @@
     </div>
   </div>
 
+  <!-- Top 3 -->
+  <div class="top3-section hidden" id="top3-section">
+    <div class="top3-header">
+      <div class="section-title" style="margin-bottom:0;">Top 3 – Bedste reaktionstid</div>
+      <button class="btn-cancel" style="font-size:0.8rem;padding:6px 12px;" onclick="toggleTop3()">Skjul</button>
+    </div>
+    <div class="podium" id="podium-container"></div>
+  </div>
+
   <!-- Databel -->
   <div class="section hidden" id="table-section">
     <div class="table-toolbar">
       <div class="section-title" style="margin-bottom:0;">Alle målinger</div>
-      <button class="btn-download" onclick="downloadExcel()">⬇ Download Excel</button>
+      <div style="display:flex;gap:10px;">
+        <button class="btn-top3" onclick="toggleTop3()">🏆 Top 3</button>
+        <button class="btn-download" onclick="downloadExcel()">⬇ Download Excel</button>
+      </div>
     </div>
     <div class="table-wrap">
       <table class="data-table">
@@ -529,28 +604,55 @@
       }
     };
 
+    // ── Top 3 ─────────────────────────────────────────────────
+    window.toggleTop3 = function () {
+      const sec = document.getElementById('top3-section');
+      if (sec.classList.contains('hidden')) {
+        renderTop3();
+        sec.classList.remove('hidden');
+      } else {
+        sec.classList.add('hidden');
+      }
+    };
+
+    function renderTop3() {
+      const medals = ['gold', 'silver', 'bronze'];
+      const icons  = ['🥇', '🥈', '🥉'];
+      const top = [...allData]
+        .sort((a, b) => a.bedste - b.bedste)
+        .slice(0, 3);
+
+      document.getElementById('podium-container').innerHTML = top.map((d, i) =>
+        `<div class="podium-item ${medals[i]}">
+           <div class="podium-card">
+             <div class="podium-medal">${icons[i]}</div>
+             <div class="podium-name">${d.testperson ?? d.id}</div>
+             <div class="podium-time">${d.bedste}</div>
+             <div class="podium-unit">ms</div>
+             <div class="podium-rank">Elev: ${d.elev}</div>
+           </div>
+         </div>`
+      ).join('');
+    }
+
     // ── Excel-download ────────────────────────────────────────
     window.downloadExcel = function () {
-      const rows = getSorted().map(d => {
-        const row = {
-          'ID':              d.id,
-          'Elev':            d.elev,
-          'Alder':           d.alder,
-          'Køn':             d.kon,
-          'Runde 1 (ms)':   d.runde1 ?? '',
-          'Runde 2 (ms)':   d.runde2 ?? '',
-          'Runde 3 (ms)':   d.runde3 ?? '',
-          'Runde 4 (ms)':   d.runde4 ?? '',
-          'Runde 5 (ms)':   d.runde5 ?? '',
-          'Gennemsnit (ms)': d.gennemsnit,
-          'Bedste (ms)':     d.bedste,
-        };
-        if (teacherMode) row['Navn (testperson)'] = d.testperson;
-        return row;
-      });
+      const rows = getSorted().map(d => ({
+        'ID':              d.id,
+        'Elev':            d.elev,
+        'Alder':           d.alder,
+        'Køn':             d.kon,
+        'Runde 1 (ms)':   d.runde1 ?? '',
+        'Runde 2 (ms)':   d.runde2 ?? '',
+        'Runde 3 (ms)':   d.runde3 ?? '',
+        'Runde 4 (ms)':   d.runde4 ?? '',
+        'Runde 5 (ms)':   d.runde5 ?? '',
+        'Gennemsnit (ms)': d.gennemsnit,
+        'Bedste (ms)':     d.bedste,
+      }));
 
       const ws = XLSX.utils.json_to_sheet(rows);
-      ws['!cols'] = [22, 16, 8, 10, 12, 12, 12, 12, 12, 16, 12, 20].map(w => ({ wch: w }));
+      ws['!cols'] = [22, 16, 8, 10, 12, 12, 12, 12, 12, 16, 12].map(w => ({ wch: w }));
       const wb = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(wb, ws, 'Reaktionstest');
       XLSX.writeFile(wb, 'reaktionstest-data.xlsx');

@@ -749,9 +749,6 @@
       <label class="radio-option" id="label-kvinde" onclick="selectGender('Kvinde')">
         <input type="radio" name="gender" value="Kvinde" /> Kvinde
       </label>
-      <label class="radio-option" id="label-andet" onclick="selectGender('Andet')">
-        <input type="radio" name="gender" value="Andet" /> Andet
-      </label>
     </div>
 
     <button class="btn btn-primary" id="start-btn" onclick="goToStep3()">Start testen</button>
@@ -1036,7 +1033,7 @@
     // ── Kønvalg ───────────────────────────────────────────────
     function selectGender(val) {
       personGender = val;
-      ['Mand','Kvinde','Andet'].forEach(g => {
+      ['Mand','Kvinde'].forEach(g => {
         document.getElementById('label-' + g.toLowerCase()).classList
           .toggle('selected', g === val);
       });
@@ -1445,7 +1442,7 @@
       personGender = "";
       document.getElementById('person-name').value  = "";
       document.getElementById('person-age').value   = "";
-      ['Mand','Kvinde','Andet'].forEach(g =>
+      ['Mand','Kvinde'].forEach(g =>
         document.getElementById('label-' + g.toLowerCase()).classList.remove('selected')
       );
       document.getElementById('saved-msg').style.display = 'none';
