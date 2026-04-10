@@ -658,6 +658,68 @@
     .progress-dot.done {
       background: #38a169;
     }
+
+    /* Top-3 modal */
+    .top3-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+    .top3-box {
+      background: white;
+      border-radius: 16px;
+      padding: 28px 24px 24px;
+      max-width: 500px;
+      width: 90%;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+      text-align: center;
+    }
+    .top3-box h2 {
+      margin: 0 0 20px;
+      font-size: 1.2rem;
+      color: #2d3748;
+    }
+    .podium {
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      gap: 12px;
+    }
+    .podium-item {
+      flex: 1;
+      max-width: 140px;
+      text-align: center;
+    }
+    .podium-card {
+      border-radius: 12px;
+      padding: 14px 8px 10px;
+    }
+    .podium-item.gold   .podium-card { background: #fffbeb; border: 2px solid #f6e05e; }
+    .podium-item.silver .podium-card { background: #f7fafc; border: 2px solid #cbd5e0; }
+    .podium-item.bronze .podium-card { background: #fff5f0; border: 2px solid #fbd38d; }
+    .podium-item.gold   { order: 2; }
+    .podium-item.silver { order: 1; }
+    .podium-item.bronze { order: 3; }
+    .podium-medal { font-size: 2rem; margin-bottom: 6px; }
+    .podium-name  { font-size: 0.85rem; font-weight: 700; color: #2d3748; margin-bottom: 4px; word-break: break-word; }
+    .podium-time  { font-size: 1.3rem; font-weight: 800; color: #4a90d9; }
+    .podium-unit  { font-size: 0.7rem; color: #718096; }
+    .top3-loading { color: #718096; font-size: 0.9rem; margin: 16px 0; }
+    .top3-close {
+      margin-top: 20px;
+      background: none;
+      border: 1px solid #cbd5e0;
+      border-radius: 8px;
+      padding: 8px 20px;
+      cursor: pointer;
+      color: #4a4a4a;
+      font-size: 0.9rem;
+    }
+    .top3-close:hover { background: #f7fafc; }
   </style>
 </head>
 <body>
@@ -668,7 +730,7 @@
     <p class="subtitle">Matematik · Deskriptiv statistik</p>
     <div style="display:flex; gap:14px; justify-content:center; margin-bottom:8px;">
       <a href="data.html" style="font-size:0.85rem; color:#4a90d9; text-decoration:none;">Se datasæt →</a>
-      <a href="data.html?top3" style="font-size:0.85rem; color:#744210; text-decoration:none;">🏆 Top 3</a>
+      <a href="#" onclick="openTop3Modal(); return false;" style="font-size:0.85rem; color:#744210; text-decoration:none;">🏆 Top 3</a>
     </div>
     <button class="teacher-btn" id="teacher-login-btn" onclick="openTeacherModal()">🔒 Lærer</button>
     <div class="teacher-badge hidden" id="teacher-badge">
@@ -688,6 +750,15 @@
         <button class="btn btn-secondary" onclick="closeTeacherModal()">Annuller</button>
         <button class="btn btn-primary" onclick="submitTeacherLogin()">Log ind</button>
       </div>
+    </div>
+  </div>
+
+  <!-- Top-3 modal -->
+  <div class="top3-overlay hidden" id="top3-modal" onclick="closeTop3Modal(event)">
+    <div class="top3-box" onclick="event.stopPropagation()">
+      <h2>🏆 Top 3 – Bedste reaktionstid</h2>
+      <div id="top3-modal-content"><p class="top3-loading">Henter data…</p></div>
+      <button class="top3-close" onclick="document.getElementById('top3-modal').classList.add('hidden')">Luk</button>
     </div>
   </div>
 
@@ -755,7 +826,7 @@
     </div>
 
     <button class="btn btn-primary" id="start-btn" onclick="goToStep3()">Start testen</button>
-    <button class="btn btn-secondary btn hidden" id="force-btn" onclick="proceedToStep3()">Registrer alligevel</button>
+    <button class="btn btn-secondary btn hidden" id="force-btn" onclick="proceedToStep3()">Tilføj nye runder</button>
   </div>
 
   <!-- TRIN 3: Reaktionstest -->
@@ -787,7 +858,12 @@
     <h2>Gennemse resultater</h2>
 
     <div class="result-big" id="result-avg">—</div>
-    <div class="result-unit">millisekunder (gennemsnit af 5 forsøg)</div>
+    <div class="result-unit" id="result-unit">millisekunder</div>
+
+    <div id="accumulated-banner" class="hidden" style="
+      background:#ebf8ff; border:1px solid #bee3f8; border-radius:8px;
+      padding:8px 14px; font-size:0.82rem; color:#2b6cb0; margin-bottom:8px; text-align:center;">
+    </div>
 
     <div id="result-details"></div>
 
@@ -797,7 +873,7 @@
     <!-- Før gem: to knapper -->
     <div id="pre-save-buttons" class="btn-group">
       <button class="btn btn-primary" onclick="confirmSave()">Gem i database</button>
-      <button class="btn btn-secondary btn" onclick="retakeTest()">Lav testen om</button>
+      <button class="btn btn-secondary btn" onclick="retakeTest()">Tag test igen</button>
     </div>
 
     <!-- Efter gem: bekræftelse -->
@@ -870,11 +946,11 @@
 
     // Standard elevliste (bruges hvis Firestore ikke har en liste)
     const DEFAULT_NAMES = [
-      'Ahmed','Alberte','Camilla','Christian','Emma','Frederik',
-      'Gustav','Ida','Jonas','Julie','Katrine','Lars','Laura',
-      'Luca','Maja','Marcus','Marie','Mathias','Mikkel','Nicolai',
-      'Oliver','Oskar','Rasmus','Sara','Sebastian','Simone',
-      'Sofia','Thomas','Victor','Villads'
+      'Alberte Wonsyld','Alma','Anna Bang','Anna Emilie','Ask',
+      'Bertram','Ella','Emil','Frederikke','Ida Kirkeby','Ida Veddum',
+      'JRB','Julie','Kathrine','Laura Holmgaard','Laura Veller','Malthe',
+      'Marie','Melisa','Mikkel Ramskov','Mikkel Sehested','Mynthe',
+      'Noah','Sidsel','Simon Haugård','Simon Thousgaard','Viktor'
     ];
 
     let teacherMode = false;
@@ -1001,9 +1077,10 @@
     let personAge   = null;
     let personGender = "";
 
-    let rounds      = [];       // gemte tider i ms
-    let currentRound = 0;       // 0-baseret
-    let state       = "idle";   // idle | waiting | ready | countdown
+    let rounds           = [];   // gemte tider i ms (nuværende session)
+    let accumulatedRounds = [];  // gode runder fra tidligere "Tag test igen"-sessioner
+    let currentRound = 0;        // 0-baseret
+    let state        = "idle";   // idle | waiting | ready | countdown
     let startTime   = null;
     let waitTimer   = null;
 
@@ -1099,9 +1176,9 @@
         if (!snap.empty) {
           const eksisterendeElev = snap.docs[0].data().elev || 'en anden elev';
           warn.innerHTML =
-            `<strong>Denne person er allerede registreret.</strong><br>` +
-            `<em>${name}</em> er tidligere blevet testet af <strong>${eksisterendeElev}</strong>.<br>` +
-            `Er du sikker på at du vil registrere personen igen?`;
+            `<strong>Denne person har allerede en måling.</strong><br>` +
+            `<em>${name}</em> er tidligere testet af <strong>${eksisterendeElev}</strong>.<br>` +
+            `Nye runder vil blive <strong>lagt til</strong> den eksisterende måling.`;
           warn.classList.remove('hidden');
           document.getElementById('force-btn').classList.remove('hidden');
           // Gem til brug ved "Fortsæt alligevel"
@@ -1297,12 +1374,29 @@
       updateProgress(4);
       show('step-4');
 
-      document.getElementById('result-avg').textContent = avg;
+      const { q1, q3, iqr, lower, upper, outliers } = analyzeOutliers(rounds);
+      const goodCurrent  = rounds.filter((_, i) => !outliers.includes(i));
+      const combinedRounds = [...accumulatedRounds, ...goodCurrent];
+      const combinedAvg  = combinedRounds.length
+        ? Math.round(combinedRounds.reduce((a, b) => a + b, 0) / combinedRounds.length)
+        : avg;
+
+      document.getElementById('result-avg').textContent = combinedAvg;
+      document.getElementById('result-unit').textContent =
+        `millisekunder (gennemsnit af ${combinedRounds.length} ${combinedRounds.length === 1 ? 'måling' : 'målinger'})`;
+
+      const banner = document.getElementById('accumulated-banner');
+      if (accumulatedRounds.length > 0) {
+        banner.classList.remove('hidden');
+        banner.textContent =
+          `${accumulatedRounds.length} gode ${accumulatedRounds.length === 1 ? 'måling' : 'målinger'} er gemt fra tidligere forsøg`;
+      } else {
+        banner.classList.add('hidden');
+      }
 
       const best = Math.min(...rounds);
       const mean = calcMean(rounds);
       const std  = calcStd(rounds);
-      const { q1, q3, iqr, lower, upper, outliers } = analyzeOutliers(rounds);
       const stdRounded = std.toFixed(1);
       const q1R  = q1.toFixed(1);
       const q3R  = q3.toFixed(1);
@@ -1339,17 +1433,22 @@
       });
       html += '</div>';
 
-      // Sammenfatning
-      html += '<div class="result-section-label">Sammenfatning</div>';
+      // Sammenfatning (baseret på kombinerede gode runder)
+      const combinedBest = Math.min(...combinedRounds.length ? combinedRounds : rounds);
+      const combinedMean = combinedRounds.length ? calcMean(combinedRounds) : mean;
+      const combinedStd  = combinedRounds.length > 1 ? calcStd(combinedRounds) : std;
+      const combinedStdR = combinedStd.toFixed(1);
+      const label = accumulatedRounds.length > 0 ? 'Samlet sammenfatning' : 'Sammenfatning';
+      html += `<div class="result-section-label">${label}</div>`;
       html += '<div class="result-details">';
-      html += `<p><span>Bedste tid</span><span>${best} ms</span></p>`;
-      html += `<p><span>Gennemsnit (x̄)</span><span>${avg} ms</span></p>`;
+      html += `<p><span>Bedste tid</span><span>${combinedBest} ms</span></p>`;
+      html += `<p><span>Gennemsnit (x̄)</span><span>${combinedAvg} ms</span></p>`;
       const stdKatex = math(
         's = \\sqrt{\\dfrac{1}{n}\\sum_{i=1}^{n}\\left(x_i - \\bar{x}\\right)^2}', true
       );
       html += `<p onclick="toggleStdFormula()" style="cursor:pointer">
         <span>Spredning (s)<span class="formel-toggle-hint" id="std-hint">▼ se formel</span></span>
-        <span>${stdRounded} ms</span>
+        <span>${combinedStdR} ms</span>
       </p>
       <div class="formel-inline hidden" id="std-formula-row">
         ${stdKatex}
@@ -1407,28 +1506,66 @@
     }
 
     function retakeTest() {
+      const { outliers } = analyzeOutliers(rounds);
+      const goodRounds = rounds.filter((_, i) => !outliers.includes(i));
+      accumulatedRounds = accumulatedRounds.concat(goodRounds);
       resetGame();
       updateProgress(3);
       show('step-3');
     }
 
     async function saveToFirebase() {
-      const avg  = Math.round(rounds.reduce((a, b) => a + b, 0) / rounds.length);
-      const best = Math.min(...rounds);
-      try {
-        const data = {
-          elev:                 studentName,
-          testperson:           personName,
-          testperson_normalized: personName.toLowerCase().replace(/\s+/g, ' '),
-          alder:                personAge,
-          kon:                  personGender,
-          gennemsnit:           avg,
-          bedste:               best,
-          tidspunkt:            window._serverTimestamp()
-        };
-        rounds.forEach((rt, i) => { data['runde' + (i + 1)] = rt; });
+      const { outliers } = analyzeOutliers(rounds);
+      const goodCurrent  = rounds.filter((_, i) => !outliers.includes(i));
+      const sessionRounds = [...accumulatedRounds, ...goodCurrent];
+      const newRounds    = sessionRounds.length ? sessionRounds : rounds;
 
-        await window._addDoc(window._collection(window._db, 'reaktioner'), data);
+      try {
+        // Tjek om personen allerede har en måling
+        const normalized = personName.toLowerCase().replace(/\s+/g, ' ');
+        const q = window._query(
+          window._collection(window._db, 'reaktioner'),
+          window._where('testperson_normalized', '==', normalized)
+        );
+        const snap = await window._getDocs(q);
+
+        let allRoundsToSave = newRounds;
+        let existingDocId   = null;
+
+        if (!snap.empty) {
+          const existingDoc = snap.docs[0];
+          existingDocId = existingDoc.id;
+          const d = existingDoc.data();
+          const prevRounds = [];
+          let i = 1;
+          while (d['runde' + i] !== undefined) {
+            prevRounds.push(d['runde' + i]);
+            i++;
+          }
+          allRoundsToSave = [...prevRounds, ...newRounds];
+        }
+
+        const avg  = Math.round(allRoundsToSave.reduce((a, b) => a + b, 0) / allRoundsToSave.length);
+        const best = Math.min(...allRoundsToSave);
+
+        const data = {
+          elev:                  studentName,
+          testperson:            personName,
+          testperson_normalized: normalized,
+          alder:                 personAge,
+          kon:                   personGender,
+          gennemsnit:            avg,
+          bedste:                best,
+          tidspunkt:             window._serverTimestamp()
+        };
+        allRoundsToSave.forEach((rt, i) => { data['runde' + (i + 1)] = rt; });
+
+        if (existingDocId) {
+          await window._setDoc(window._doc(window._db, 'reaktioner', existingDocId), data);
+        } else {
+          await window._addDoc(window._collection(window._db, 'reaktioner'), data);
+        }
+
         document.getElementById('post-save').classList.remove('hidden');
         setTimeout(resetAll, 1200);
       } catch (err) {
@@ -1440,6 +1577,7 @@
 
     // ── Start forfra ──────────────────────────────────────────
     function resetAll() {
+      accumulatedRounds = [];
       personName   = "";
       personAge    = null;
       personGender = "";
@@ -1473,6 +1611,48 @@
     window.addStudentName       = addStudentName;
     window.removeStudentName    = removeStudentName;
     window.saveStudentList      = saveStudentList;
+
+    // ── Top-3 modal ───────────────────────────────────────────
+    window.openTop3Modal = async function () {
+      const modal   = document.getElementById('top3-modal');
+      const content = document.getElementById('top3-modal-content');
+      modal.classList.remove('hidden');
+      content.innerHTML = '<p class="top3-loading">Henter data…</p>';
+
+      try {
+        const snap = await window._getDocs(window._collection(window._db, 'reaktioner'));
+        const data = snap.docs.map(d => d.data());
+        if (!data.length) {
+          content.innerHTML = '<p class="top3-loading">Ingen målinger endnu.</p>';
+          return;
+        }
+        const top = [...data]
+          .sort((a, b) => a.gennemsnit - b.gennemsnit)
+          .slice(0, 3);
+        const medals = ['gold', 'silver', 'bronze'];
+        const icons  = ['🥇', '🥈', '🥉'];
+        content.innerHTML = `<div class="podium">
+          ${top.map((d, i) => `
+            <div class="podium-item ${medals[i]}">
+              <div class="podium-card">
+                <div class="podium-medal">${icons[i]}</div>
+                <div class="podium-name">${d.testperson ?? '–'}</div>
+                <div class="podium-time">${d.gennemsnit}</div>
+                <div class="podium-unit">ms (gns.)</div>
+              </div>
+            </div>`).join('')}
+        </div>`;
+      } catch (e) {
+        console.error('Top-3 fejl:', e);
+        content.innerHTML = '<p class="top3-loading">Kunne ikke hente data.</p>';
+      }
+    };
+
+    window.closeTop3Modal = function (e) {
+      if (e.target === document.getElementById('top3-modal')) {
+        document.getElementById('top3-modal').classList.add('hidden');
+      }
+    };
   </script>
 </body>
 </html>
