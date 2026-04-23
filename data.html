@@ -194,11 +194,62 @@
     }
 
     .btn-download {
-      background: #38a169; color: white; border: none; border-radius: 10px;
-      padding: 10px 18px; font-size: 0.9rem; font-weight: 700; cursor: pointer;
+      background: #38a169; color: white; border: none; border-radius: 10px 0 0 10px;
+      padding: 10px 16px; font-size: 0.9rem; font-weight: 700; cursor: pointer;
       transition: background 0.15s;
     }
     .btn-download:hover { background: #2f855a; }
+
+    .btn-download-caret {
+      background: #2f855a; color: white; border: none; border-radius: 0 10px 10px 0;
+      padding: 10px 10px; font-size: 0.85rem; font-weight: 700; cursor: pointer;
+      border-left: 1px solid #276749; transition: background 0.15s;
+    }
+    .btn-download-caret:hover { background: #276749; }
+
+    .download-group { position: relative; display: flex; }
+
+    .download-menu {
+      display: none;
+      position: absolute;
+      top: calc(100% + 6px);
+      right: 0;
+      background: white;
+      border: 1.5px solid #e2e8f0;
+      border-radius: 12px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.13);
+      min-width: 240px;
+      z-index: 50;
+      overflow: hidden;
+    }
+    .download-menu.open { display: block; }
+
+    .download-menu-title {
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+      color: #a0aec0;
+      padding: 10px 16px 6px;
+    }
+
+    .download-menu-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      width: 100%;
+      background: none;
+      border: none;
+      padding: 10px 16px;
+      font-size: 0.88rem;
+      color: #2d3748;
+      cursor: pointer;
+      text-align: left;
+      transition: background 0.1s;
+    }
+    .download-menu-item:hover { background: #f7fafc; }
+    .download-menu-item .menu-icon { font-size: 1rem; width: 20px; text-align: center; }
+    .download-menu-divider { height: 1px; background: #edf2f7; margin: 4px 0; }
 
     .table-wrap { overflow-x: auto; }
 
@@ -298,6 +349,78 @@
     }
     .btn-top3:hover { background: #ecc94b; }
 
+    /* Filtreret download */
+    .filter-download-section {
+      background: white;
+      border-radius: 16px;
+      padding: 24px;
+      max-width: 960px;
+      margin: 0 auto 20px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    }
+
+    .filter-rows {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .filter-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .filter-label {
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: #2d3748;
+      min-width: 80px;
+    }
+
+    .filter-age-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .filter-age-group label {
+      font-size: 0.85rem;
+      color: #718096;
+    }
+
+    .filter-age-input {
+      width: 64px;
+      padding: 7px 10px;
+      border: 2px solid #e2e8f0;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      text-align: center;
+      outline: none;
+    }
+    .filter-age-input:focus { border-color: #4a90d9; }
+
+    .btn-filter-download {
+      background: #4a90d9;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      padding: 9px 18px;
+      font-size: 0.88rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.15s;
+      white-space: nowrap;
+    }
+    .btn-filter-download:hover { background: #357abd; }
+
+    .filter-info {
+      font-size: 0.8rem;
+      color: #a0aec0;
+      margin-left: auto;
+    }
+
     /* Loading / states */
     .state-msg { text-align: center; padding: 48px 16px; color: #718096; font-size: 0.95rem; line-height: 1.8; }
     .spinner {
@@ -367,13 +490,75 @@
     <div class="podium" id="podium-container"></div>
   </div>
 
+  <!-- Filtreret download -->
+  <div class="filter-download-section hidden" id="filter-download-section">
+    <div class="section-title" style="margin-bottom:16px;">Download filtreret datasæt</div>
+    <div class="filter-rows">
+
+      <div class="filter-row">
+        <div class="filter-label">Kvinder</div>
+        <div class="filter-age-group">
+          <label>Alder fra</label>
+          <input class="filter-age-input" type="number" id="kvinder-min" min="0" max="99" placeholder="–">
+          <label>til</label>
+          <input class="filter-age-input" type="number" id="kvinder-max" min="0" max="99" placeholder="–">
+        </div>
+        <button class="btn-filter-download" onclick="downloadFiltered('Kvinde', 'kvinder-min', 'kvinder-max')">⬇ Download</button>
+        <span class="filter-info" id="kvinder-count"></span>
+      </div>
+
+      <div class="filter-row">
+        <div class="filter-label">Mænd</div>
+        <div class="filter-age-group">
+          <label>Alder fra</label>
+          <input class="filter-age-input" type="number" id="maend-min" min="0" max="99" placeholder="–">
+          <label>til</label>
+          <input class="filter-age-input" type="number" id="maend-max" min="0" max="99" placeholder="–">
+        </div>
+        <button class="btn-filter-download" onclick="downloadFiltered('Mand', 'maend-min', 'maend-max')">⬇ Download</button>
+        <span class="filter-info" id="maend-count"></span>
+      </div>
+
+    </div>
+  </div>
+
   <!-- Databel -->
   <div class="section hidden" id="table-section">
     <div class="table-toolbar">
       <div class="section-title" style="margin-bottom:0;">Alle målinger</div>
       <div style="display:flex;gap:10px;">
         <button class="btn-top3" onclick="toggleTop3()">🏆 Top 3</button>
-        <button class="btn-download" onclick="downloadExcel()">⬇ Download Excel</button>
+        <button class="btn-top3" style="background:#ebf8ff;color:#2b6cb0;" onclick="toggleFilterDownload()">🔽 Filtreret download</button>
+        <div class="download-group" id="download-group">
+          <button class="btn-download" onclick="downloadExcel('sort')">⬇ Download Excel</button>
+          <button class="btn-download-caret" onclick="toggleDownloadMenu(event)" title="Vælg sortering">▾</button>
+          <div class="download-menu" id="download-menu">
+            <div class="download-menu-title">Vælg sortering</div>
+            <button class="download-menu-item" onclick="downloadExcel('sort')">
+              <span class="menu-icon">↕</span> Aktuel tabelsortering
+            </button>
+            <button class="download-menu-item" onclick="downloadExcel('tidspunkt')">
+              <span class="menu-icon">🕐</span> Kronologisk rækkefølge
+            </button>
+            <div class="download-menu-divider"></div>
+            <button class="download-menu-item" onclick="downloadExcel('gennemsnit')">
+              <span class="menu-icon">⚡</span> Gennemsnit (hurtigst først)
+            </button>
+            <button class="download-menu-item" onclick="downloadExcel('alder')">
+              <span class="menu-icon">🎂</span> Alder (yngst først)
+            </button>
+            <button class="download-menu-item" onclick="downloadExcel('kon')">
+              <span class="menu-icon">👥</span> Køn (alfabetisk)
+            </button>
+            <button class="download-menu-item" onclick="downloadExcel('elev')">
+              <span class="menu-icon">📋</span> Elevnavn (alfabetisk)
+            </button>
+            <div class="download-menu-divider"></div>
+            <button class="download-menu-item" onclick="downloadExcel('alle')">
+              <span class="menu-icon">📊</span> <strong>Alle sorteringer (ét ark)</strong>
+            </button>
+          </div>
+        </div>
         <button id="btn-clear-all" class="btn-delete" style="display:none;padding:10px 14px;font-size:0.9rem;font-weight:700;border-radius:10px;border:2px solid #e53e3e;color:#e53e3e;" onclick="clearAllData()">🗑 Ryd alt data</button>
       </div>
     </div>
@@ -459,6 +644,7 @@
         renderStats();
         renderTable();
         document.getElementById('stats-section').classList.remove('hidden');
+        document.getElementById('filter-download-section').classList.remove('hidden');
         document.getElementById('table-section').classList.remove('hidden');
 
       } catch (err) {
@@ -618,20 +804,45 @@
     }
 
     // ── Excel-download ────────────────────────────────────────
-    window.downloadExcel = function () {
-      const maxRunder = allData.reduce((max, d) => {
+    const SORT_OPTIONS = [
+      { key: 'tidspunkt',   label: 'Kronologisk',          col: null,         dir: 'asc'  },
+      { key: 'gennemsnit',  label: 'Gennemsnit (hurtigst)', col: 'gennemsnit', dir: 'asc'  },
+      { key: 'alder',       label: 'Alder (yngst)',         col: 'alder',      dir: 'asc'  },
+      { key: 'kon',         label: 'Køn',                   col: 'kon',        dir: 'asc'  },
+      { key: 'elev',        label: 'Elevnavn',              col: 'elev',       dir: 'asc'  },
+    ];
+
+    function getMaxRunder() {
+      return allData.reduce((max, d) => {
         let i = 1;
         while (d['runde' + i] !== undefined) i++;
         return Math.max(max, i - 1);
       }, 0);
+    }
 
-      const rows = getSorted().map(d => {
+    function sortData(sortKey) {
+      if (sortKey === 'sort') return getSorted();
+      if (sortKey === 'tidspunkt') {
+        return [...allData].sort((a, b) => (a.tidspunkt?.seconds ?? 0) - (b.tidspunkt?.seconds ?? 0));
+      }
+      const opt = SORT_OPTIONS.find(o => o.key === sortKey);
+      if (!opt || !opt.col) return [...allData];
+      return [...allData].sort((a, b) => {
+        const av = a[opt.col], bv = b[opt.col];
+        if (typeof av === 'number') return opt.dir === 'asc' ? av - bv : bv - av;
+        return String(av ?? '').localeCompare(String(bv ?? ''), 'da');
+      });
+    }
+
+    function buildRows(data, maxRunder) {
+      return data.map(d => {
         const row = {
           'ID':    d.id,
           'Elev':  d.elev,
           'Alder': d.alder,
           'Køn':   d.kon,
         };
+        if (teacherMode) row['Navn'] = d.testperson ?? '';
         for (let i = 1; i <= maxRunder; i++) {
           row[`Runde ${i} (ms)`] = d['runde' + i] ?? '';
         }
@@ -639,14 +850,124 @@
         row['Bedste (ms)']     = d.bedste;
         return row;
       });
+    }
 
+    function makeSheet(rows, maxRunder) {
       const ws = XLSX.utils.json_to_sheet(rows);
-      const colWidths = [22, 16, 8, 10, ...Array(maxRunder).fill(12), 16, 12];
+      const nameCol = teacherMode ? 1 : 0;
+      const colWidths = [22, 16, 8, 10];
+      if (teacherMode) colWidths.splice(1, 0, 20);
+      for (let i = 0; i < maxRunder; i++) colWidths.push(12);
+      colWidths.push(16, 12);
       ws['!cols'] = colWidths.map(w => ({ wch: w }));
+      return ws;
+    }
+
+    window.downloadExcel = function (sortKey = 'sort') {
+      closeDownloadMenu();
+      const maxRunder = getMaxRunder();
+
+      if (sortKey === 'alle') {
+        const wb = XLSX.utils.book_new();
+        for (const opt of SORT_OPTIONS) {
+          const rows = buildRows(sortData(opt.key), maxRunder);
+          XLSX.utils.book_append_sheet(wb, makeSheet(rows, maxRunder), opt.label);
+        }
+        XLSX.writeFile(wb, 'reaktionstest-alle-sorteringer.xlsx');
+        return;
+      }
+
+      const rows = buildRows(sortData(sortKey), maxRunder);
+      const ws = makeSheet(rows, maxRunder);
       const wb = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(wb, ws, 'Reaktionstest');
-      XLSX.writeFile(wb, 'reaktionstest-data.xlsx');
+
+      const suffix = sortKey === 'sort' ? '' : '-' + sortKey;
+      XLSX.writeFile(wb, `reaktionstest-data${suffix}.xlsx`);
     };
+
+    window.toggleDownloadMenu = function (e) {
+      e.stopPropagation();
+      document.getElementById('download-menu').classList.toggle('open');
+    };
+
+    function closeDownloadMenu() {
+      document.getElementById('download-menu').classList.remove('open');
+    }
+
+    document.addEventListener('click', function (e) {
+      if (!document.getElementById('download-group').contains(e.target)) {
+        closeDownloadMenu();
+      }
+    });
+
+    // ── Filtreret download ────────────────────────────────────
+    window.toggleFilterDownload = function () {
+      const sec = document.getElementById('filter-download-section');
+      sec.classList.toggle('hidden');
+      if (!sec.classList.contains('hidden')) updateFilterCounts();
+    };
+
+    function updateFilterCounts() {
+      for (const { kon, minId, maxId, countId } of [
+        { kon: 'Kvinde', minId: 'kvinder-min', maxId: 'kvinder-max', countId: 'kvinder-count' },
+        { kon: 'Mand',   minId: 'maend-min',   maxId: 'maend-max',   countId: 'maend-count'  },
+      ]) {
+        const filtered = getFiltered(kon, minId, maxId);
+        document.getElementById(countId).textContent =
+          filtered.length > 0 ? `${filtered.length} person(er)` : 'Ingen match';
+      }
+    }
+
+    function getFiltered(kon, minId, maxId) {
+      const minVal = document.getElementById(minId).value;
+      const maxVal = document.getElementById(maxId).value;
+      const minAge = minVal !== '' ? parseInt(minVal) : -Infinity;
+      const maxAge = maxVal !== '' ? parseInt(maxVal) :  Infinity;
+      return allData.filter(d =>
+        d.kon === kon &&
+        d.alder >= minAge &&
+        d.alder <= maxAge
+      );
+    }
+
+    window.downloadFiltered = function (kon, minId, maxId) {
+      const data = getFiltered(kon, minId, maxId);
+
+      if (data.length === 0) {
+        alert('Ingen målinger matcher det valgte filter.');
+        return;
+      }
+
+      const minVal = document.getElementById(minId).value;
+      const maxVal = document.getElementById(maxId).value;
+
+      const rows = data
+        .sort((a, b) => a.gennemsnit - b.gennemsnit)
+        .map(d => ({
+          'ID':               d.id,
+          'Elev':             d.elev,
+          'Alder':            d.alder,
+          'Køn':              d.kon,
+          'Gennemsnit (ms)':  d.gennemsnit,
+        }));
+
+      const ws = XLSX.utils.json_to_sheet(rows);
+      ws['!cols'] = [{ wch: 22 }, { wch: 16 }, { wch: 8 }, { wch: 10 }, { wch: 16 }];
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, kon === 'Kvinde' ? 'Kvinder' : 'Mænd');
+
+      const aldersStr = (minVal || '?') + '-' + (maxVal || '?');
+      const kønsStr   = kon === 'Kvinde' ? 'kvinder' : 'maend';
+      XLSX.writeFile(wb, `reaktionstest-${kønsStr}-alder${aldersStr}.xlsx`);
+    };
+
+    // Opdater antal ved ændring af aldersfelter
+    document.addEventListener('input', function (e) {
+      if (['kvinder-min','kvinder-max','maend-min','maend-max'].includes(e.target.id)) {
+        updateFilterCounts();
+      }
+    });
 
     // ── Login / modal ─────────────────────────────────────────
     window.openModal = function () {
