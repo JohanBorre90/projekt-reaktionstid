@@ -430,9 +430,157 @@
     }
     @keyframes spin { to { transform: rotate(360deg); } }
     .hidden { display: none !important; }
+
+    /* Edit-modal */
+    .edit-modal-box {
+      background: white;
+      border-radius: 16px;
+      padding: 28px 24px;
+      width: 100%;
+      max-width: 480px;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+    }
+    .edit-modal-box h2 { font-size: 1.2rem; margin-bottom: 20px; }
+
+    .edit-field-label {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: #4a5568;
+      display: block;
+      margin-bottom: 6px;
+    }
+
+    .edit-input {
+      width: 100%;
+      padding: 9px 12px;
+      border: 2px solid #e2e8f0;
+      border-radius: 10px;
+      font-size: 0.95rem;
+      outline: none;
+      margin-bottom: 16px;
+      background: #f7fafc;
+      color: #1a202c;
+    }
+    .edit-input:focus { border-color: #4a90d9; background: white; }
+
+    .edit-gender-row { display: flex; gap: 8px; margin-bottom: 16px; }
+    .edit-gender-option {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 12px;
+      border: 2px solid #e2e8f0;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.9rem;
+    }
+    .edit-gender-option input[type="radio"] { accent-color: #4a90d9; }
+
+    .edit-rounds-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .edit-round-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: #f7fafc;
+      border-radius: 8px;
+      padding: 6px 10px;
+      margin-bottom: 6px;
+    }
+    .edit-round-label { font-size: 0.82rem; color: #718096; min-width: 64px; }
+    .edit-round-input {
+      width: 80px;
+      padding: 5px 8px;
+      border: 1.5px solid #e2e8f0;
+      border-radius: 6px;
+      font-size: 0.9rem;
+      text-align: right;
+      outline: none;
+      background: white;
+    }
+    .edit-round-input:focus { border-color: #4a90d9; }
+    .edit-round-unit { font-size: 0.82rem; color: #a0aec0; }
+    .btn-remove-round {
+      margin-left: auto;
+      background: none;
+      border: 1.5px solid #fed7d7;
+      border-radius: 6px;
+      color: #e53e3e;
+      font-size: 0.9rem;
+      font-weight: 700;
+      width: 26px;
+      height: 26px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      padding: 0;
+      line-height: 1;
+    }
+    .btn-remove-round:hover { background: #fff5f5; }
+
+    .btn-edit {
+      background: none;
+      border: 1.5px solid #bee3f8;
+      border-radius: 6px;
+      color: #2b6cb0;
+      font-size: 0.78rem;
+      font-weight: 600;
+      padding: 3px 10px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .btn-edit:hover { background: #ebf8ff; border-color: #90cdf4; }
   </style>
 </head>
 <body>
+
+  <!-- Edit-modal -->
+  <div class="modal-overlay" id="edit-modal" onclick="if(event.target===this)closeEditModal()">
+    <div class="edit-modal-box" onclick="event.stopPropagation()">
+      <h2>Rediger måling</h2>
+
+      <label class="edit-field-label">Navn</label>
+      <input type="text" id="edit-name" class="edit-input" placeholder="Fornavn Efternavn" />
+
+      <div style="display:flex;gap:12px;">
+        <div style="flex:1;">
+          <label class="edit-field-label">Alder</label>
+          <input type="number" id="edit-age" class="edit-input" min="1" max="120" placeholder="f.eks. 42" />
+        </div>
+        <div style="flex:1;">
+          <label class="edit-field-label">Køn</label>
+          <div class="edit-gender-row">
+            <label class="edit-gender-option">
+              <input type="radio" name="edit-gender" value="Mand"> Mand
+            </label>
+            <label class="edit-gender-option">
+              <input type="radio" name="edit-gender" value="Kvinde"> Kvinde
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <div class="edit-rounds-header">
+        <label class="edit-field-label" style="margin-bottom:0;">Runder <span id="edit-round-count" style="font-weight:400;color:#a0aec0;"></span></label>
+      </div>
+      <div id="edit-rounds-list" style="margin-bottom:16px;"></div>
+
+      <div class="modal-error" id="edit-error"></div>
+      <div class="modal-buttons">
+        <button class="btn-primary" id="edit-save-btn" onclick="saveEdit()">Gem ændringer</button>
+        <button class="btn-cancel" onclick="closeEditModal()">Annuller</button>
+      </div>
+    </div>
+  </div>
 
   <!-- Login-modal -->
   <div class="modal-overlay" id="login-modal">
@@ -584,7 +732,7 @@
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-    import { getFirestore, collection, getDocs, doc, deleteDoc }
+    import { getFirestore, collection, getDocs, doc, deleteDoc, setDoc }
       from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
     // ============================================================
@@ -618,7 +766,8 @@
 
     // Ekstra kolonner i lærer-tilstand (navn + slet)
     const COL_NAVN  = { key: 'testperson', label: 'Navn',  numeric: false };
-    const COL_SLET  = { key: '_slet',      label: 'Slet',  numeric: false, noSort: true };
+    const COL_SLET    = { key: '_slet',    label: 'Slet',    numeric: false, noSort: true };
+    const COL_REDIGER = { key: '_rediger', label: 'Rediger', numeric: false, noSort: true };
 
     let allData    = [];
     let sortCol    = null;
@@ -628,7 +777,7 @@
     function getColumns() {
       const base = [...COLUMNS_STATIC_START, ...COLUMNS_STATIC_END];
       if (!teacherMode) return base;
-      return [base[0], COL_NAVN, ...base.slice(1), COL_SLET];
+      return [base[0], COL_NAVN, ...base.slice(1), COL_REDIGER, COL_SLET];
     }
 
     // ── Hent data ─────────────────────────────────────────────
@@ -740,6 +889,9 @@
       document.getElementById('table-body').innerHTML =
         getSorted().map(d =>
           '<tr>' + cols.map(col => {
+            if (col.key === '_rediger') {
+              return `<td><button class="btn-edit" onclick="openEditModal('${d._docId}')">✏ Rediger</button></td>`;
+            }
             if (col.key === '_slet') {
               return `<td><button class="btn-delete" onclick="deleteEntry('${d._docId}', '${d.id}')">Slet</button></td>`;
             }
@@ -781,6 +933,119 @@
       } catch (err) {
         console.error(err);
         alert('Kunne ikke rydde data. Prøv igen.');
+      }
+    };
+
+    // ── Rediger entry ─────────────────────────────────────────
+    let editingDoc = null;
+
+    window.openEditModal = function (docId) {
+      const d = allData.find(x => x._docId === docId);
+      if (!d) return;
+
+      const rounds = [];
+      let i = 1;
+      while (d['runde' + i] !== undefined) { rounds.push(d['runde' + i]); i++; }
+
+      editingDoc = { _docId: docId, rounds: [...rounds] };
+
+      document.getElementById('edit-name').value = d.testperson ?? '';
+      document.getElementById('edit-age').value  = d.alder ?? '';
+      document.querySelectorAll('input[name="edit-gender"]').forEach(r => {
+        r.checked = r.value === d.kon;
+      });
+
+      document.getElementById('edit-error').textContent = '';
+      document.getElementById('edit-save-btn').disabled = false;
+      document.getElementById('edit-save-btn').textContent = 'Gem ændringer';
+
+      renderEditRounds();
+      document.getElementById('edit-modal').classList.add('open');
+    };
+
+    window.closeEditModal = function () {
+      document.getElementById('edit-modal').classList.remove('open');
+      editingDoc = null;
+    };
+
+    function renderEditRounds() {
+      const container = document.getElementById('edit-rounds-list');
+      container.innerHTML = editingDoc.rounds.map((rt, i) =>
+        `<div class="edit-round-row">
+          <span class="edit-round-label">Runde ${i + 1}</span>
+          <input type="number" class="edit-round-input" value="${rt}" min="1" max="9999" />
+          <span class="edit-round-unit">ms</span>
+          <button class="btn-remove-round" onclick="removeRoundFromEdit(${i})" title="Slet runde">&times;</button>
+        </div>`
+      ).join('');
+      const n = editingDoc.rounds.length;
+      document.getElementById('edit-round-count').textContent =
+        `(${n} ${n === 1 ? 'runde' : 'runder'})`;
+    }
+
+    window.removeRoundFromEdit = function (idx) {
+      // Sync current input values before splicing
+      const inputs = document.querySelectorAll('.edit-round-input');
+      editingDoc.rounds = Array.from(inputs).map(inp => parseInt(inp.value) || 0);
+      editingDoc.rounds.splice(idx, 1);
+      renderEditRounds();
+    };
+
+    window.saveEdit = async function () {
+      const name   = document.getElementById('edit-name').value.trim();
+      const age    = parseInt(document.getElementById('edit-age').value);
+      const gender = document.querySelector('input[name="edit-gender"]:checked')?.value;
+
+      // Read round values from DOM
+      const roundInputs = document.querySelectorAll('.edit-round-input');
+      const rounds = Array.from(roundInputs).map(inp => parseInt(inp.value)).filter(v => !isNaN(v) && v > 0);
+
+      const errEl = document.getElementById('edit-error');
+      if (!name)             { errEl.textContent = 'Navn må ikke være tomt.';          return; }
+      if (!age || age < 1)   { errEl.textContent = 'Ugyldig alder.';                   return; }
+      if (!gender)           { errEl.textContent = 'Vælg et køn.';                     return; }
+      if (rounds.length < 1) { errEl.textContent = 'Der skal være mindst 1 runde.';    return; }
+      errEl.textContent = '';
+
+      const avg  = Math.round(rounds.reduce((a, b) => a + b, 0) / rounds.length);
+      const best = Math.min(...rounds);
+
+      const existing = allData.find(d => d._docId === editingDoc._docId);
+      const fullData = {
+        elev:                  existing.elev,
+        testperson:            name,
+        testperson_normalized: name.toLowerCase().replace(/\s+/g, ' '),
+        alder:                 age,
+        kon:                   gender,
+        gennemsnit:            avg,
+        bedste:                best,
+        tidspunkt:             existing.tidspunkt,
+      };
+      rounds.forEach((rt, i) => { fullData['runde' + (i + 1)] = rt; });
+
+      const btn = document.getElementById('edit-save-btn');
+      btn.disabled = true;
+      btn.textContent = 'Gemmer…';
+
+      try {
+        await setDoc(doc(db, 'reaktioner', editingDoc._docId), fullData);
+
+        // Update allData in place
+        const idx = allData.findIndex(d => d._docId === editingDoc._docId);
+        if (idx !== -1) {
+          // Remove old runde fields
+          Object.keys(allData[idx]).filter(k => /^runde\d+$/.test(k)).forEach(k => delete allData[idx][k]);
+          Object.assign(allData[idx], fullData);
+        }
+
+        closeEditModal();
+        renderStats();
+        renderTable();
+      } catch (err) {
+        console.error(err);
+        errEl.textContent = 'Kunne ikke gemme. Prøv igen.';
+        btn.disabled = false;
+        btn.textContent = 'Gem ændringer';
       }
     };
 
