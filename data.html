@@ -519,6 +519,18 @@
         <span class="filter-info" id="maend-count"></span>
       </div>
 
+      <div class="filter-row">
+        <div class="filter-label">Alle</div>
+        <div class="filter-age-group">
+          <label>Alder fra</label>
+          <input class="filter-age-input" type="number" id="alle-min" min="0" max="99" placeholder="–">
+          <label>til</label>
+          <input class="filter-age-input" type="number" id="alle-max" min="0" max="99" placeholder="–">
+        </div>
+        <button class="btn-filter-download" onclick="downloadFiltered(null, 'alle-min', 'alle-max')">⬇ Download</button>
+        <span class="filter-info" id="alle-count"></span>
+      </div>
+
     </div>
   </div>
 
@@ -912,6 +924,7 @@
       for (const { kon, minId, maxId, countId } of [
         { kon: 'Kvinde', minId: 'kvinder-min', maxId: 'kvinder-max', countId: 'kvinder-count' },
         { kon: 'Mand',   minId: 'maend-min',   maxId: 'maend-max',   countId: 'maend-count'  },
+        { kon: null,     minId: 'alle-min',     maxId: 'alle-max',     countId: 'alle-count'   },
       ]) {
         const filtered = getFiltered(kon, minId, maxId);
         document.getElementById(countId).textContent =
@@ -925,7 +938,7 @@
       const minAge = minVal !== '' ? parseInt(minVal) : -Infinity;
       const maxAge = maxVal !== '' ? parseInt(maxVal) :  Infinity;
       return allData.filter(d =>
-        d.kon === kon &&
+        (kon === null || d.kon === kon) &&
         d.alder >= minAge &&
         d.alder <= maxAge
       );
@@ -955,16 +968,17 @@
       const ws = XLSX.utils.json_to_sheet(rows);
       ws['!cols'] = [{ wch: 22 }, { wch: 16 }, { wch: 8 }, { wch: 10 }, { wch: 16 }];
       const wb = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb, ws, kon === 'Kvinde' ? 'Kvinder' : 'Mænd');
+      const sheetName = kon === 'Kvinde' ? 'Kvinder' : kon === 'Mand' ? 'Mænd' : 'Alle';
+      XLSX.utils.book_append_sheet(wb, ws, sheetName);
 
       const aldersStr = (minVal || '?') + '-' + (maxVal || '?');
-      const kønsStr   = kon === 'Kvinde' ? 'kvinder' : 'maend';
+      const kønsStr   = kon === 'Kvinde' ? 'kvinder' : kon === 'Mand' ? 'maend' : 'alle';
       XLSX.writeFile(wb, `reaktionstest-${kønsStr}-alder${aldersStr}.xlsx`);
     };
 
     // Opdater antal ved ændring af aldersfelter
     document.addEventListener('input', function (e) {
-      if (['kvinder-min','kvinder-max','maend-min','maend-max'].includes(e.target.id)) {
+      if (['kvinder-min','kvinder-max','maend-min','maend-max','alle-min','alle-max'].includes(e.target.id)) {
         updateFilterCounts();
       }
     });
